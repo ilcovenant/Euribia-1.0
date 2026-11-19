@@ -143,7 +143,7 @@ export default function App() {
   const nextPort = currentPortIndex < resolvedPorts.length - 1 ? resolvedPorts[currentPortIndex + 1] : null;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-slate-950">
+    <div className="min-h-screen overflow-x-clip bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-slate-950">
       {/* Header Mobile First */}
       <Header
         currentPortName={activePort.citta}
@@ -283,34 +283,40 @@ export default function App() {
         {/* Navigazione Veloce tra Porti Precedente / Successivo */}
         <nav 
           aria-label="Navigazione tra scali successivi" 
-          className="pt-4 pb-8 flex items-center justify-between gap-3 no-print"
+          className="pt-4 pb-8 grid grid-cols-2 gap-2.5 w-full no-print"
         >
           {prevPort ? (
             <button
               onClick={() => handleSelectPort(prevPort.id)}
-              className="flex-1 p-3 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-left transition active:scale-95 flex items-center gap-2"
+              className="w-full min-w-0 overflow-hidden p-2.5 sm:p-3 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-left transition active:scale-95 flex items-center gap-2"
             >
-              <ChevronLeft className="w-5 h-5 text-cyan-400 shrink-0" />
-              <div className="truncate">
-                <div className="text-[10px] text-slate-400 font-mono">Giorno {prevPort.giornoNumero}</div>
-                <div className="text-xs font-bold text-white truncate">{prevPort.porto}</div>
+              <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400 shrink-0" />
+              <div className="min-w-0 flex-1">
+                <div className="text-[10px] text-slate-400 font-mono truncate">Giorno {prevPort.giornoNumero}</div>
+                <div className="text-xs font-bold text-white truncate">
+                  {prevPort.bandiera} {prevPort.citta.split('/')[0].trim()}
+                </div>
               </div>
             </button>
           ) : (
-            <div className="flex-1" />
+            <div />
           )}
 
-          {nextPort && (
+          {nextPort ? (
             <button
               onClick={() => handleSelectPort(nextPort.id)}
-              className="flex-1 p-3 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-right transition active:scale-95 flex items-center justify-end gap-2"
+              className="w-full min-w-0 overflow-hidden p-2.5 sm:p-3 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-right transition active:scale-95 flex items-center justify-end gap-2"
             >
-              <div className="truncate">
-                <div className="text-[10px] text-slate-400 font-mono">Giorno {nextPort.giornoNumero}</div>
-                <div className="text-xs font-bold text-white truncate">{nextPort.porto}</div>
+              <div className="min-w-0 flex-1">
+                <div className="text-[10px] text-slate-400 font-mono truncate">Giorno {nextPort.giornoNumero}</div>
+                <div className="text-xs font-bold text-white truncate">
+                  {nextPort.citta.split('/')[0].trim()} {nextPort.bandiera}
+                </div>
               </div>
-              <ChevronRight className="w-5 h-5 text-cyan-400 shrink-0" />
+              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400 shrink-0" />
             </button>
+          ) : (
+            <div />
           )}
         </nav>
       </main>

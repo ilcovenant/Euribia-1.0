@@ -54,29 +54,29 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="sticky top-0 z-30 bg-slate-950/95 backdrop-blur-md border-b border-slate-800/80 px-4 py-3 select-none no-print">
-      <div className="max-w-xl mx-auto flex items-center justify-between gap-3">
+      <div className="max-w-xl mx-auto flex items-center justify-between gap-2">
         {/* Logo & Titolo */}
-        <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-600 to-blue-500 flex items-center justify-center text-slate-950 shadow-md shadow-cyan-900/30 font-bold">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="w-9 h-9 shrink-0 rounded-xl bg-gradient-to-tr from-cyan-600 to-blue-500 flex items-center justify-center text-slate-950 shadow-md shadow-cyan-900/30 font-bold">
             <Ship className="w-5 h-5 text-slate-950 stroke-[2.2]" />
           </div>
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center gap-1.5">
-              <h1 className="font-extrabold text-sm sm:text-base text-white tracking-tight flex items-center gap-1.5">
+              <h1 className="font-extrabold text-sm sm:text-base text-white tracking-tight truncate">
                 MSC Euribia
               </h1>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-cyan-950 text-cyan-300 border border-cyan-800/70 font-semibold">
+              <span className="shrink-0 text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-cyan-950 text-cyan-300 border border-cyan-800/70 font-semibold">
                 7 Notti
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 font-medium truncate max-w-[170px] sm:max-w-xs">
+            <p className="text-[11px] text-slate-400 font-medium truncate">
               4 Amici • Guida Tappe & Logistica
             </p>
           </div>
         </div>
 
         {/* Pulsanti Azioni Rapide */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 shrink-0">
           <PWAInstallButton />
 
           <button
