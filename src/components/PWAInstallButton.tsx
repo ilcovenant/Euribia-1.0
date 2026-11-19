@@ -39,10 +39,10 @@ export const PWAInstallButton: React.FC = () => {
           onClick={() => setShowGuideModal(true)}
           aria-label="Come installare l'App PWA"
           title="Installa come App Offline"
-          className="flex items-center gap-1 text-[11px] font-bold bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-700/80 px-2.5 py-1.5 rounded-xl transition active:scale-95"
+          className="flex items-center gap-1 text-[11px] font-bold bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-700/80 px-2 py-1.5 rounded-xl transition active:scale-95 shrink-0"
         >
-          <Smartphone className="w-3.5 h-3.5 text-emerald-400" />
-          <span>Installa App</span>
+          <Smartphone className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+          <span>Installa</span>
         </button>
 
         {showGuideModal && (
