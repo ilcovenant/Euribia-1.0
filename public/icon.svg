@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#020617" />
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#22d3ee" />
+      <stop offset="100%" stop-color="#3b82f6" />
+    </linearGradient>
+    <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.95" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)" />
+  <rect x="24" y="24" width="464" height="464" rx="92" fill="none" stroke="url(#accentGrad)" stroke-width="8" stroke-opacity="0.35" />
+  <!-- Compass / Sun halo -->
+  <circle cx="256" cy="196" r="88" fill="#083344" opacity="0.65" />
+  <!-- Funnel -->
+  <path d="M224 128 L288 128 L296 168 L216 168 Z" fill="url(#accentGrad)" />
+  <rect x="222" y="144" width="68" height="10" rx="4" fill="#090d16" opacity="0.55" />
+  <!-- Upper Deck -->
+  <path d="M168 176 L344 176 L360 228 L152 228 Z" rx="12" fill="#e2e8f0" />
+  <rect x="184" y="192" width="32" height="16" rx="4" fill="#0f172a" />
+  <rect x="240" y="192" width="32" height="16" rx="4" fill="#0f172a" />
+  <rect x="296" y="192" width="32" height="16" rx="4" fill="#0f172a" />
+  <!-- Ship Hull -->
+  <path d="M116 238 L396 238 L356 322 C348 338 330 346 310 346 L202 346 C182 346 164 338 156 322 Z" fill="url(#accentGrad)" />
+  <!-- Bow Center Line -->
+  <path d="M256 238 L256 346" stroke="#090d16" stroke-width="8" stroke-opacity="0.28" />
+  <!-- Waves -->
+  <path d="M96 364 Q136 340 176 364 T256 364 T336 364 T416 364" fill="none" stroke="url(#waveGrad)" stroke-width="18" stroke-linecap="round" />
+  <path d="M128 404 Q168 382 208 404 T288 404 T384 404" fill="none" stroke="#38bdf8" stroke-width="12" stroke-linecap="round" stroke-opacity="0.55" />
+</svg>

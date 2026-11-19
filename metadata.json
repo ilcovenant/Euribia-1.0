@@ -1,0 +1,6 @@
+{
+  "name": "MSC Euribia - Guida & Itinerari Crociera",
+  "description": "Cruscotto logistico mobile-first e guida tappe a piedi per la crociera MSC Euribia (Napoli, Palermo, La Goletta/Tunisi, Barcellona, Marsiglia).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
