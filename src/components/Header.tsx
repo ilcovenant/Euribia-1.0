@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Ship, Info, Printer, Download, Sun, Moon, MoreVertical } from 'lucide-react';
+import { Ship, Info, Printer, Download, MoreVertical } from 'lucide-react';
 import { PWAInstallButton } from './PWAInstallButton';
 
 interface HeaderProps {
@@ -17,9 +17,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenCruiseInfo,
   onDownloadOfflineBundle
 }) => {
-  const [isWakeLockActive, setIsWakeLockActive] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const wakeLockRef = useRef<any>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -32,33 +30,6 @@ export const Header: React.FC<HeaderProps> = ({
     document.addEventListener('mousedown', handleOutsideClick);
     return () => document.removeEventListener('mousedown', handleOutsideClick);
   }, [isMenuOpen]);
-
-  const toggleWakeLock = async () => {
-    if (typeof navigator === 'undefined' || !('wakeLock' in navigator)) {
-      alert('La funzione "Tieni schermo sempre attivo" non è supportata da questo browser.');
-      return;
-    }
-
-    try {
-      if (isWakeLockActive) {
-        if (wakeLockRef.current) {
-          await wakeLockRef.current.release();
-          wakeLockRef.current = null;
-        }
-        setIsWakeLockActive(false);
-      } else {
-        const sentinel = await (navigator as any).wakeLock.request('screen');
-        sentinel.addEventListener('release', () => {
-          setIsWakeLockActive(false);
-          wakeLockRef.current = null;
-        });
-        wakeLockRef.current = sentinel;
-        setIsWakeLockActive(true);
-      }
-    } catch (err) {
-      console.warn('Wake Lock request error:', err);
-    }
-  };
 
   const handlePrint = () => {
     setIsMenuOpen(false);
@@ -96,20 +67,6 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Pulsanti Azioni Rapide */}
         <div className="flex items-center gap-1.5 shrink-0">
           <PWAInstallButton />
-
-          <button
-            onClick={toggleWakeLock}
-            aria-label={isWakeLockActive ? 'Disattiva schermo sempre acceso' : 'Tieni schermo sempre acceso mentre cammini'}
-            title={isWakeLockActive ? 'Schermo sempre attivo (ON)' : 'Tieni schermo sempre attivo (ideale camminando per strada)'}
-            className={`w-8 h-8 sm:w-auto sm:h-auto sm:px-2.5 sm:py-1.5 rounded-xl border text-[11px] font-semibold flex items-center justify-center gap-1 transition active:scale-95 ${
-              isWakeLockActive
-                ? 'bg-amber-500/20 text-amber-300 border-amber-500/60 shadow-sm shadow-amber-900/30'
-                : 'bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border-slate-800'
-            }`}
-          >
-            {isWakeLockActive ? <Sun className="w-4 h-4 sm:w-3.5 sm:h-3.5 text-amber-400" /> : <Moon className="w-4 h-4 sm:w-3.5 sm:h-3.5" />}
-            <span className="hidden sm:inline">{isWakeLockActive ? 'Schermo ON' : 'Schermo'}</span>
-          </button>
 
           {/* Pulsanti secondari inline su desktop/tablet */}
           <button
