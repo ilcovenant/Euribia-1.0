@@ -7,7 +7,9 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   PORT_RETURN_SCHEDULES,
   PORT_SCHEDULE_MAP,
+  CRUISE_BOARDING_MS,
   CRUISE_DEPARTURE_MS,
+  CRUISE_ARRIVAL_MS,
   findTodayPort,
   computePortCountdown,
   ComputedCountdown
@@ -76,8 +78,10 @@ export function useAllAboardCountdown(currentAppPortId?: string) {
   const [nowMs, setNowMs] = useState<number>(() => Date.now());
 
   const [selectedPortId, setSelectedPortId] = useState<string>(() => {
-    const today = findTodayPort(Date.now());
+    const now = Date.now();
+    const today = findTodayPort(now);
     if (today) return today.portId;
+    if (now < CRUISE_DEPARTURE_MS) return 'genova-imbarco';
     if (currentAppPortId && PORT_SCHEDULE_MAP[currentAppPortId]) return currentAppPortId;
     return PORT_RETURN_SCHEDULES[0].portId;
   });
@@ -105,7 +109,6 @@ export function useAllAboardCountdown(currentAppPortId?: string) {
       const saved = localStorage.getItem(SIM_STORAGE_KEY);
       if (!saved) return null;
       const parsed: SimulationState = JSON.parse(saved);
-      // Scarta vecchie simulazioni scadute da oltre 15 minuti
       if (parsed && typeof parsed.targetMs === 'number' && parsed.targetMs > Date.now() - 15 * 60_000) {
         return parsed;
       }
@@ -175,7 +178,6 @@ export function useAllAboardCountdown(currentAppPortId?: string) {
   const startSimulation = useCallback((portId: string, remainingMinutes: number) => {
     const now = Date.now();
     const targetMs = now + remainingMinutes * 60_000;
-    // Simula una tipica finestra a terra di 6 ore per una resa realistica dell'anello
     const windowMs = Math.max(remainingMinutes * 60_000, 6 * 3_600_000);
     setSelectedPortId(portId);
     setSimulation({ portId, targetMs, windowMs });
@@ -193,7 +195,6 @@ export function useAllAboardCountdown(currentAppPortId?: string) {
     setAlertPrefs(prev => {
       const next = { ...prev, enabled: !prev.enabled };
       if (next.enabled) {
-        // Sblocca AudioContext su gesto esplicito con feedback leggero
         playOfflineAlertSignal();
       }
       return next;
@@ -205,7 +206,7 @@ export function useAllAboardCountdown(currentAppPortId?: string) {
     setAlertPrefs(prev => ({ ...prev, thresholdMin }));
   }, []);
 
-  // Determina l'eventuale countdown LIVE (o simulazione attiva, o giorno reale dello scalo)
+  // Determina l'eventuale countdown LIVE (o simulazione attiva, o giorno reale)
   const todayPort = findTodayPort(nowMs);
   const livePort = simulation
     ? PORT_SCHEDULE_MAP[simulation.portId] || PORT_RETURN_SCHEDULES[0]
@@ -215,7 +216,7 @@ export function useAllAboardCountdown(currentAppPortId?: string) {
     ? computePortCountdown(livePort, nowMs, portOffsetsMin[livePort.portId] || 0, simulation)
     : null;
 
-  // Stato dello scalo attualmente ispezionato nella vista Countdown
+  // Stato della tappa attualmente ispezionata nella vista Countdown
   const inspectedPort = PORT_SCHEDULE_MAP[selectedPortId] || PORT_RETURN_SCHEDULES[0];
   const inspectedCountdown: ComputedCountdown = computePortCountdown(
     inspectedPort,
@@ -224,8 +225,11 @@ export function useAllAboardCountdown(currentAppPortId?: string) {
     simulation
   );
 
-  // Tempo alla partenza da Genova (pre-crociera)
+  // Tappe principali di crociera (Boarding Genova 14:00, Partenza Genova 17:00, Arrivo Genova 30 nov 09:00)
+  const boardingRemainingMs = Math.max(0, CRUISE_BOARDING_MS - nowMs);
   const preCruiseRemainingMs = Math.max(0, CRUISE_DEPARTURE_MS - nowMs);
+  const arrivalRemainingMs = Math.max(0, CRUISE_ARRIVAL_MS - nowMs);
+  const isBeforeBoarding = nowMs < CRUISE_BOARDING_MS;
   const isBeforeCruise = nowMs < CRUISE_DEPARTURE_MS;
 
   // Trigger avviso offline quando il countdown live scende sotto la soglia scelta
@@ -240,7 +244,7 @@ export function useAllAboardCountdown(currentAppPortId?: string) {
       firedAlertKeyRef.current = alertKey;
       playOfflineAlertSignal();
       setAlertBannerMessage(
-        `Soglia rientro raggiunta (${alertPrefs.thresholdMin} min): inizia a dirigerti al molo di ${activeLiveCountdown.port.citta}.`
+        `Soglia rientro raggiunta (${alertPrefs.thresholdMin} min): dirigiti al molo di ${activeLiveCountdown.port.citta}.`
       );
     }
   }, [alertPrefs, activeLiveCountdown]);
@@ -252,8 +256,11 @@ export function useAllAboardCountdown(currentAppPortId?: string) {
     setSelectedPortId,
     inspectedCountdown,
     activeLiveCountdown,
+    isBeforeBoarding,
     isBeforeCruise,
+    boardingRemainingMs,
     preCruiseRemainingMs,
+    arrivalRemainingMs,
     portOffsetsMin,
     adjustPortOffset,
     resetPortOffset,

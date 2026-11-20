@@ -104,8 +104,8 @@ export default function App() {
   };
 
   const handleSelectCountdown = () => {
-    // Se non è in corso una simulazione né uno scalo reale oggi, pre-seleziona l'ultimo porto aperto
-    if (!countdown.simulation && !countdown.todayPort) {
+    // Prima della partenza lascia Genova Imbarco; durante la crociera pre-seleziona l'ultimo porto aperto se non c'è uno scalo oggi
+    if (!countdown.simulation && !countdown.todayPort && !countdown.isBeforeCruise) {
       countdown.setSelectedPortId(lastPortId);
     }
     setActiveViewId('countdown');
@@ -197,7 +197,7 @@ export default function App() {
         checkedStopsByPort={checkedStopsByPort}
         activeLiveCountdown={countdown.activeLiveCountdown}
         isBeforeCruise={countdown.isBeforeCruise}
-        preCruiseRemainingMs={countdown.preCruiseRemainingMs}
+        preCruiseRemainingMs={countdown.isBeforeBoarding ? countdown.boardingRemainingMs : countdown.preCruiseRemainingMs}
       />
 
       {/* Intestazione speciale visibile SOLO in fase di stampa / PDF */}
@@ -217,8 +217,11 @@ export default function App() {
             selectedPortId={countdown.selectedPortId}
             onSelectPortId={countdown.setSelectedPortId}
             inspectedCountdown={countdown.inspectedCountdown}
+            isBeforeBoarding={countdown.isBeforeBoarding}
             isBeforeCruise={countdown.isBeforeCruise}
+            boardingRemainingMs={countdown.boardingRemainingMs}
             preCruiseRemainingMs={countdown.preCruiseRemainingMs}
+            arrivalRemainingMs={countdown.arrivalRemainingMs}
             todayPortId={countdown.todayPort?.portId || null}
             simulation={countdown.simulation}
             onAdjustOffset={countdown.adjustPortOffset}

@@ -3,21 +3,31 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * Pianificazione oraria e dati di rientro al molo per MSC Euribia (23–30 nov 2026).
- * Tutti i 5 porti sono in fuso unico UTC+1 (CET) a fine novembre.
+ * Include Imbarco Genova (23 nov · Boarding 14:00 · Partenza 17:00), i 5 scali e Arrivo Genova (30 nov · 09:00).
+ * Tutti i porti sono in fuso unico UTC+1 (CET) a fine novembre.
  */
 
 export type UrgencyLevel = 'pre-cruise' | 'scheduled' | 'safe' | 'caution' | 'critical' | 'expired';
+export type ScheduleKind = 'embark' | 'port' | 'disembark';
 
 export interface PortDockReturnInfo {
   portId: string;
+  kind: ScheduleKind;
+  hasItinerary: boolean;
   isoDate: string; // YYYY-MM-DD (UTC+1)
   citta: string;
+  tabLabel: string;
   bandiera: string;
   giornoNumero: number;
+  giornoCaption: string;
   orarioAttracco: string;
   orarioTuttiABordo: string;
   orarioPartenza: string;
+  col1Label: string;
+  col2Label: string;
+  col3Label: string;
   mapsReturnQuery: string;
+  mapsCtaLabel: string;
   taxiCard: {
     terminalTitolo: string;
     indirizzoLocale: string;
@@ -27,21 +37,63 @@ export interface PortDockReturnInfo {
   };
 }
 
-/** Partenza crociera da Genova (UTC+1) */
+/** Imbarco / Boarding Genova (23 nov 2026 ore 14:00 UTC+1) */
+export const CRUISE_BOARDING_ISO = '2026-11-23T14:00:00+01:00';
+export const CRUISE_BOARDING_MS = Date.parse(CRUISE_BOARDING_ISO);
+
+/** Partenza crociera da Genova (23 nov 2026 ore 17:00 UTC+1) */
 export const CRUISE_DEPARTURE_ISO = '2026-11-23T17:00:00+01:00';
 export const CRUISE_DEPARTURE_MS = Date.parse(CRUISE_DEPARTURE_ISO);
 
+/** Arrivo finale a Genova (30 nov 2026 ore 09:00 UTC+1) */
+export const CRUISE_ARRIVAL_ISO = '2026-11-30T09:00:00+01:00';
+export const CRUISE_ARRIVAL_MS = Date.parse(CRUISE_ARRIVAL_ISO);
+
 export const PORT_RETURN_SCHEDULES: PortDockReturnInfo[] = [
   {
+    portId: 'genova-imbarco',
+    kind: 'embark',
+    hasItinerary: false,
+    isoDate: '2026-11-23',
+    citta: 'Genova (Imbarco)',
+    tabLabel: 'Genova Imbarco',
+    bandiera: '⚓',
+    giornoNumero: 1,
+    giornoCaption: 'Giorno 1 · Imbarco',
+    orarioAttracco: '14:00',
+    orarioTuttiABordo: '16:00',
+    orarioPartenza: '17:00',
+    col1Label: 'Boarding',
+    col2Label: 'Chiusura Imbarco',
+    col3Label: 'Partenza Nave',
+    mapsReturnQuery: 'Stazione Marittima Ponte dei Mille Genova',
+    mapsCtaLabel: 'Apri Terminal Imbarco Genova su Maps',
+    taxiCard: {
+      terminalTitolo: 'Stazione Marittima – Ponte dei Mille (MSC)',
+      indirizzoLocale: 'Ponte dei Mille / Via Andrea Doria, 16126 Genova (Terminal Crociere)',
+      linguaLabel: 'Italiano',
+      fraseTassista: 'Per favore, alla Stazione Marittima di Genova – Terminal Crociere MSC Euribia (Ponte dei Mille).',
+      notaRientro: 'Boarding previsto dalle 14:00 (tieni a portata di mano biglietto MSC, documenti e bagagli etichettati). Partenza nave ore 17:00.'
+    }
+  },
+  {
     portId: 'napoli',
+    kind: 'port',
+    hasItinerary: true,
     isoDate: '2026-11-24',
     citta: 'Napoli',
+    tabLabel: 'Napoli',
     bandiera: '🇮🇹',
     giornoNumero: 2,
+    giornoCaption: 'Giorno 2 · Scalo',
     orarioAttracco: '13:00',
     orarioTuttiABordo: '19:15',
     orarioPartenza: '20:00',
+    col1Label: 'Attracco',
+    col2Label: 'Tutti a Bordo',
+    col3Label: 'Partenza',
     mapsReturnQuery: 'Stazione Marittima Molo Angioino Napoli',
+    mapsCtaLabel: 'Apri Rientro al Molo su Google Maps',
     taxiCard: {
       terminalTitolo: 'Stazione Marittima – Molo Angioino',
       indirizzoLocale: 'Piazzale Stazione Marittima, 80133 Napoli (Terminal Crociere)',
@@ -52,14 +104,22 @@ export const PORT_RETURN_SCHEDULES: PortDockReturnInfo[] = [
   },
   {
     portId: 'palermo',
+    kind: 'port',
+    hasItinerary: true,
     isoDate: '2026-11-25',
     citta: 'Palermo',
+    tabLabel: 'Palermo',
     bandiera: '🇮🇹',
     giornoNumero: 3,
+    giornoCaption: 'Giorno 3 · Scalo',
     orarioAttracco: '09:00',
     orarioTuttiABordo: '17:15',
     orarioPartenza: '18:00',
+    col1Label: 'Attracco',
+    col2Label: 'Tutti a Bordo',
+    col3Label: 'Partenza',
     mapsReturnQuery: 'Palermo Cruise Terminal Molo Vittorio Veneto',
+    mapsCtaLabel: 'Apri Rientro al Molo su Google Maps',
     taxiCard: {
       terminalTitolo: 'Terminal Crociere – Molo Vittorio Veneto',
       indirizzoLocale: 'Via Francesco Crispi / Varco Amari, 90139 Palermo',
@@ -70,14 +130,22 @@ export const PORT_RETURN_SCHEDULES: PortDockReturnInfo[] = [
   },
   {
     portId: 'la-goletta',
+    kind: 'port',
+    hasItinerary: true,
     isoDate: '2026-11-26',
     citta: 'La Goletta',
+    tabLabel: 'La Goletta',
     bandiera: '🇹🇳',
     giornoNumero: 4,
+    giornoCaption: 'Giorno 4 · Scalo',
     orarioAttracco: '09:00',
     orarioTuttiABordo: '17:15',
     orarioPartenza: '18:00',
+    col1Label: 'Attracco',
+    col2Label: 'Tutti a Bordo',
+    col3Label: 'Partenza',
     mapsReturnQuery: 'Port de La Goulette Terminal Croisieres Tunis',
+    mapsCtaLabel: 'Apri Rientro al Molo su Google Maps',
     taxiCard: {
       terminalTitolo: 'Terminal Croisières – Goulette Village',
       indirizzoLocale: 'Port de La Goulette (Halq al-Wadi), Tunis',
@@ -88,14 +156,22 @@ export const PORT_RETURN_SCHEDULES: PortDockReturnInfo[] = [
   },
   {
     portId: 'barcellona',
+    kind: 'port',
+    hasItinerary: true,
     isoDate: '2026-11-28',
     citta: 'Barcellona',
+    tabLabel: 'Barcellona',
     bandiera: '🇪🇸',
     giornoNumero: 6,
+    giornoCaption: 'Giorno 6 · Scalo',
     orarioAttracco: '08:00',
     orarioTuttiABordo: '17:15',
     orarioPartenza: '18:00',
+    col1Label: 'Attracco',
+    col2Label: 'Tutti a Bordo',
+    col3Label: 'Partenza',
     mapsReturnQuery: 'Cruise Bus T3 Monument a Colom Barcelona',
+    mapsCtaLabel: 'Apri Rientro al Molo su Google Maps',
     taxiCard: {
       terminalTitolo: 'Terminal Creuers – Moll Adossat (MSC)',
       indirizzoLocale: 'Moll Adossat, Port de Barcelona (oppure Bus T3 a Monument a Colom)',
@@ -106,20 +182,54 @@ export const PORT_RETURN_SCHEDULES: PortDockReturnInfo[] = [
   },
   {
     portId: 'marsiglia',
+    kind: 'port',
+    hasItinerary: true,
     isoDate: '2026-11-29',
     citta: 'Marsiglia',
+    tabLabel: 'Marsiglia',
     bandiera: '🇫🇷',
     giornoNumero: 7,
+    giornoCaption: 'Giorno 7 · Scalo',
     orarioAttracco: '09:00',
     orarioTuttiABordo: '17:15',
     orarioPartenza: '18:00',
+    col1Label: 'Attracco',
+    col2Label: 'Tutti a Bordo',
+    col3Label: 'Partenza',
     mapsReturnQuery: 'Marseille Provence Cruise Terminal MPCT Porte 4',
+    mapsCtaLabel: 'Apri Rientro al Molo su Google Maps',
     taxiCard: {
       terminalTitolo: 'Marseille Provence Cruise Terminal (MPCT)',
       indirizzoLocale: 'Porte 4 – Môle Léon Gourret, 13015 Marseille',
       linguaLabel: 'Francese',
       fraseTassista: "S'il vous plaît, au Terminal Croisières MPCT – Porte 4 (bateau MSC Euribia).",
       notaRientro: 'Il terminal è a 8 km dal Vieux-Port: considera almeno 25–30 min in taxi o navetta + Bus 35.'
+    }
+  },
+  {
+    portId: 'genova-arrivo',
+    kind: 'disembark',
+    hasItinerary: false,
+    isoDate: '2026-11-30',
+    citta: 'Genova (Arrivo)',
+    tabLabel: 'Genova Arrivo',
+    bandiera: '🏁',
+    giornoNumero: 8,
+    giornoCaption: 'Fine 7 Notti · Arrivo',
+    orarioAttracco: '09:00',
+    orarioTuttiABordo: '09:00',
+    orarioPartenza: '10:30',
+    col1Label: 'Arrivo Porto',
+    col2Label: 'Sbarco Previsto',
+    col3Label: 'Fine Sbarco',
+    mapsReturnQuery: 'Stazione Genova Piazza Principe',
+    mapsCtaLabel: 'Apri Stazione Genova Principe su Maps',
+    taxiCard: {
+      terminalTitolo: 'Stazione Marittima Genova – Ponte dei Mille',
+      indirizzoLocale: 'Arrivo MSC Euribia ore 09:00 · 5 min a piedi da Stazione Genova Piazza Principe',
+      linguaLabel: 'Italiano',
+      fraseTassista: 'Sbarco da MSC Euribia alla Stazione Marittima di Genova (Ponte dei Mille).',
+      notaRientro: 'Arrivo in porto alle 09:00 dopo le 7 notti di crociera. Ricorda di lasciare le valigie fuori cabina la sera del 29 nov entro l’orario indicato sul Daily Program.'
     }
   }
 ];
@@ -159,7 +269,6 @@ export function shiftTimeString(hhmm: string, offsetMin: number): string {
  * Restituisce la data YYYY-MM-DD corrente nel fuso della crociera (UTC+1 / CET).
  */
 export function getCruiseIsoDate(nowMs: number): string {
-  // Aggiunge +1 ora (UTC+1) e legge i componenti UTC
   const cetDate = new Date(nowMs + 3_600_000);
   const y = cetDate.getUTCFullYear();
   const m = String(cetDate.getUTCMonth() + 1).padStart(2, '0');
@@ -168,7 +277,7 @@ export function getCruiseIsoDate(nowMs: number): string {
 }
 
 /**
- * Trova l'eventuale porto programmato esattamente nella data odierna (fuso UTC+1).
+ * Trova l'eventuale giorno crociera (imbarco, scalo o arrivo finale) programmato nella data odierna (UTC+1).
  */
 export function findTodayPort(nowMs: number): PortDockReturnInfo | null {
   const todayIso = getCruiseIsoDate(nowMs);
@@ -176,7 +285,7 @@ export function findTodayPort(nowMs: number): PortDockReturnInfo | null {
 }
 
 /**
- * Determina il livello di urgenza dal tempo residuo al Tutti a Bordo.
+ * Determina il livello di urgenza dal tempo residuo.
  */
 export function getUrgencyFromRemainingMs(remainingMs: number): UrgencyLevel {
   if (remainingMs <= 0) return 'expired';
@@ -198,7 +307,7 @@ export function formatDurationHms(ms: number): string {
 }
 
 /**
- * Formatta un intervallo in ms in formato compatto per la barra superiore (es. "2h 14m", "42m", "00:00").
+ * Formatta un intervallo in ms in formato compatto per la barra superiore (es. "2h 14m", "42m 10s", "3g 5h").
  */
 export function formatCompactDuration(ms: number): string {
   if (ms <= 0) return 'Scaduto';
@@ -227,16 +336,17 @@ export interface ComputedCountdown {
   isPreCruise: boolean;
   offsetMin: number;
   adjustedAllAboardTime: string;
+  targetLabel: string;
   targetMs: number;
   departureMs: number;
   remainingMs: number;
   remainingToDepartureMs: number;
-  progressPercent: number; // 0 -> inizio sbarco, 100 -> Tutti a Bordo raggiunto
+  progressPercent: number;
   urgency: UrgencyLevel;
 }
 
 /**
- * Calcola lo stato completo del countdown per uno scalo specifico (reale o simulato).
+ * Calcola lo stato completo del countdown per imbarco Genova, scalo intermedio o arrivo finale Genova.
  */
 export function computePortCountdown(
   port: PortDockReturnInfo,
@@ -253,6 +363,13 @@ export function computePortCountdown(
     const elapsed = simulation.windowMs - remainingMs;
     const progressPercent = Math.min(100, Math.max(0, Math.round((elapsed / simulation.windowMs) * 100)));
 
+    const simLabel =
+      port.kind === 'embark'
+        ? 'Alla chiusura imbarco'
+        : port.kind === 'disembark'
+        ? 'All’arrivo a Genova'
+        : 'Al Tutti a Bordo';
+
     return {
       port,
       isSimulated: true,
@@ -260,6 +377,7 @@ export function computePortCountdown(
       isPreCruise: false,
       offsetMin,
       adjustedAllAboardTime,
+      targetLabel: simLabel,
       targetMs: simulation.targetMs,
       departureMs,
       remainingMs,
@@ -269,13 +387,103 @@ export function computePortCountdown(
     };
   }
 
-  const dockMs = parseCruiseTimestamp(port.isoDate, port.orarioAttracco, 0);
-  const targetMs = parseCruiseTimestamp(port.isoDate, port.orarioTuttiABordo, offsetMin);
-  const departureMs = parseCruiseTimestamp(port.isoDate, port.orarioPartenza, offsetMin);
-
   const todayIso = getCruiseIsoDate(nowMs);
   const isLiveToday = todayIso === port.isoDate;
   const isPreCruise = nowMs < CRUISE_DEPARTURE_MS;
+
+  // 1) Imbarco Genova (Giorno 1 · 23 nov): prima delle 14:00 conta al Boarding 14:00, poi conta alla Partenza 17:00
+  if (port.kind === 'embark') {
+    const boardingMs = parseCruiseTimestamp(port.isoDate, port.orarioAttracco, offsetMin); // 14:00
+    const departureMs = parseCruiseTimestamp(port.isoDate, port.orarioPartenza, offsetMin); // 17:00
+    const isBeforeBoarding = nowMs < boardingMs;
+
+    const targetMs = isBeforeBoarding ? boardingMs : departureMs;
+    const remainingMs = targetMs - nowMs;
+    const remainingToDepartureMs = departureMs - nowMs;
+    const targetLabel = isBeforeBoarding ? 'Al Boarding (14:00)' : 'Alla partenza da Genova';
+
+    let urgency: UrgencyLevel;
+    let progressPercent = 0;
+
+    if (nowMs >= departureMs) {
+      urgency = 'expired';
+      progressPercent = 100;
+    } else if (isLiveToday) {
+      if (isBeforeBoarding) {
+        urgency = getUrgencyFromRemainingMs(remainingMs);
+        // Finestra 4 ore prima del boarding per barra visiva del giorno imbarco
+        const prepWindow = 4 * 3_600_000;
+        progressPercent = Math.min(100, Math.max(0, Math.round(((prepWindow - remainingMs) / prepWindow) * 100)));
+      } else {
+        urgency = getUrgencyFromRemainingMs(remainingMs);
+        const embarkWindow = Math.max(1, departureMs - boardingMs);
+        progressPercent = Math.min(100, Math.max(0, Math.round(((nowMs - boardingMs) / embarkWindow) * 100)));
+      }
+    } else {
+      urgency = 'pre-cruise';
+      progressPercent = 0;
+    }
+
+    return {
+      port,
+      isSimulated: false,
+      isLiveToday,
+      isPreCruise,
+      offsetMin,
+      adjustedAllAboardTime: shiftTimeString(isBeforeBoarding ? port.orarioAttracco : port.orarioPartenza, offsetMin),
+      targetLabel,
+      targetMs,
+      departureMs,
+      remainingMs,
+      remainingToDepartureMs,
+      progressPercent,
+      urgency
+    };
+  }
+
+  // 2) Arrivo finale Genova (30 nov · 09:00)
+  if (port.kind === 'disembark') {
+    const arrivalMs = parseCruiseTimestamp(port.isoDate, port.orarioAttracco, offsetMin); // 09:00
+    const endDisembarkMs = parseCruiseTimestamp(port.isoDate, port.orarioPartenza, offsetMin); // 10:30
+    const remainingMs = arrivalMs - nowMs;
+    const remainingToDepartureMs = endDisembarkMs - nowMs;
+    const totalCruiseMs = Math.max(1, arrivalMs - CRUISE_DEPARTURE_MS);
+
+    let urgency: UrgencyLevel;
+    let progressPercent = 0;
+
+    if (nowMs >= arrivalMs) {
+      urgency = 'expired';
+      progressPercent = 100;
+    } else if (nowMs < CRUISE_DEPARTURE_MS) {
+      urgency = 'pre-cruise';
+      progressPercent = 0;
+    } else {
+      progressPercent = Math.min(100, Math.max(0, Math.round(((nowMs - CRUISE_DEPARTURE_MS) / totalCruiseMs) * 100)));
+      urgency = isLiveToday ? getUrgencyFromRemainingMs(remainingMs) : 'scheduled';
+    }
+
+    return {
+      port,
+      isSimulated: false,
+      isLiveToday,
+      isPreCruise,
+      offsetMin,
+      adjustedAllAboardTime: shiftTimeString(port.orarioAttracco, offsetMin),
+      targetLabel: 'All’arrivo a Genova (09:00)',
+      targetMs: arrivalMs,
+      departureMs: endDisembarkMs,
+      remainingMs,
+      remainingToDepartureMs,
+      progressPercent,
+      urgency
+    };
+  }
+
+  // 3) Scali intermedi (Napoli, Palermo, La Goletta, Barcellona, Marsiglia)
+  const dockMs = parseCruiseTimestamp(port.isoDate, port.orarioAttracco, 0);
+  const targetMs = parseCruiseTimestamp(port.isoDate, port.orarioTuttiABordo, offsetMin);
+  const departureMs = parseCruiseTimestamp(port.isoDate, port.orarioPartenza, offsetMin);
 
   const remainingMs = targetMs - nowMs;
   const remainingToDepartureMs = departureMs - nowMs;
@@ -307,6 +515,7 @@ export function computePortCountdown(
     isPreCruise,
     offsetMin,
     adjustedAllAboardTime,
+    targetLabel: isLiveToday ? 'Al Tutti a Bordo' : 'Mancano allo scalo',
     targetMs,
     departureMs,
     remainingMs,

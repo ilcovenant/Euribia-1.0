@@ -9,6 +9,7 @@ import {
   ComputedCountdown,
   formatDurationHms,
   formatCompactDuration,
+  shiftTimeString,
   UrgencyLevel
 } from '../data/countdownData';
 import { AlertPreferences, SimulationState, playOfflineAlertSignal } from '../hooks/useAllAboardCountdown';
@@ -34,8 +35,11 @@ interface CountdownViewProps {
   selectedPortId: string;
   onSelectPortId: (portId: string) => void;
   inspectedCountdown: ComputedCountdown;
+  isBeforeBoarding: boolean;
   isBeforeCruise: boolean;
+  boardingRemainingMs: number;
   preCruiseRemainingMs: number;
+  arrivalRemainingMs: number;
   todayPortId: string | null;
   simulation: SimulationState | null;
   onAdjustOffset: (portId: string, deltaMin: number) => void;
@@ -50,12 +54,17 @@ interface CountdownViewProps {
   onOpenPortItinerary: (portId: string) => void;
 }
 
-function getUrgencyStyle(urgency: UrgencyLevel) {
+function getUrgencyStyle(urgency: UrgencyLevel, kind: 'embark' | 'port' | 'disembark') {
   switch (urgency) {
     case 'safe':
       return {
-        label: 'Margine comodo',
-        sublabel: 'Goditi le tappe con calma: hai ancora ampio margine.',
+        label: kind === 'embark' ? 'Imbarco con margine' : kind === 'disembark' ? 'Arrivo programmato' : 'Margine comodo',
+        sublabel:
+          kind === 'embark'
+            ? 'Preparati con calma per il check-in a Ponte dei Mille.'
+            : kind === 'disembark'
+            ? 'Ultima mattina a bordo prima dello sbarco a Genova.'
+            : 'Goditi le tappe con calma: hai ancora ampio margine.',
         textColor: 'text-emerald-400',
         ringStroke: '#10b981',
         borderClass: 'border-emerald-800/60',
@@ -64,8 +73,13 @@ function getUrgencyStyle(urgency: UrgencyLevel) {
       };
     case 'caution':
       return {
-        label: 'Inizia il rientro al molo',
-        sublabel: 'Meno di 90 minuti al Tutti a Bordo: avvicinati al terminal.',
+        label: kind === 'embark' ? 'Avvicinati al terminal' : kind === 'disembark' ? 'Arrivo imminente' : 'Inizia il rientro al molo',
+        sublabel:
+          kind === 'embark'
+            ? 'Meno di 90 minuti: tieni pronti biglietto MSC e documenti.'
+            : kind === 'disembark'
+            ? 'Meno di 90 minuti all’attracco a Genova (ore 09:00).'
+            : 'Meno di 90 minuti al Tutti a Bordo: avvicinati al terminal.',
         textColor: 'text-amber-400',
         ringStroke: '#f59e0b',
         borderClass: 'border-amber-700/70',
@@ -74,8 +88,13 @@ function getUrgencyStyle(urgency: UrgencyLevel) {
       };
     case 'critical':
       return {
-        label: 'Rientro immediato al terminal',
-        sublabel: 'Meno di 45 minuti: torna subito verso la nave!',
+        label: kind === 'embark' ? 'Imbarco imminente!' : kind === 'disembark' ? 'Quasi a Genova!' : 'Rientro immediato al terminal',
+        sublabel:
+          kind === 'embark'
+            ? 'Meno di 45 minuti: raggiungi subito il gate MSC a Ponte dei Mille.'
+            : kind === 'disembark'
+            ? 'Meno di 45 minuti all’arrivo al porto di Genova.'
+            : 'Meno di 45 minuti: torna subito verso la nave!',
         textColor: 'text-rose-400',
         ringStroke: '#f43f5e',
         borderClass: 'border-rose-600/80',
@@ -84,18 +103,28 @@ function getUrgencyStyle(urgency: UrgencyLevel) {
       };
     case 'expired':
       return {
-        label: 'Tutti a Bordo superato',
-        sublabel: 'La passerella chiude ora: recati subito al molo.',
-        textColor: 'text-rose-400',
-        ringStroke: '#e11d48',
-        borderClass: 'border-rose-600',
-        surfaceClass: 'bg-rose-950/50',
-        Icon: AlertTriangle
+        label: kind === 'embark' ? 'Nave in partenza' : kind === 'disembark' ? 'Arrivati a Genova' : 'Tutti a Bordo superato',
+        sublabel:
+          kind === 'embark'
+            ? 'La MSC Euribia è in partenza dal porto di Genova.'
+            : kind === 'disembark'
+            ? 'Crociera conclusa: bentornati al porto di Genova!'
+            : 'La passerella chiude ora: recati subito al molo.',
+        textColor: kind === 'disembark' ? 'text-cyan-400' : 'text-rose-400',
+        ringStroke: kind === 'disembark' ? '#06b6d4' : '#e11d48',
+        borderClass: kind === 'disembark' ? 'border-cyan-700/70' : 'border-rose-600',
+        surfaceClass: kind === 'disembark' ? 'bg-cyan-950/30' : 'bg-rose-950/50',
+        Icon: kind === 'disembark' ? CheckCircle2 : AlertTriangle
       };
     case 'pre-cruise':
       return {
-        label: 'Scalo programmato',
-        sublabel: 'Il countdown live partirà automaticamente il giorno dello scalo.',
+        label: kind === 'embark' ? 'Imbarco Genova · 23 nov' : kind === 'disembark' ? 'Rientro fine 7 notti' : 'Scalo programmato',
+        sublabel:
+          kind === 'embark'
+            ? 'Boarding dalle 14:00 a Ponte dei Mille, partenza nave alle 17:00.'
+            : kind === 'disembark'
+            ? 'Rientro previsto al porto di Genova lunedì 30 novembre alle 09:00.'
+            : 'Il countdown live partirà automaticamente il giorno dello scalo.',
         textColor: 'text-cyan-400',
         ringStroke: '#06b6d4',
         borderClass: 'border-slate-800',
@@ -105,7 +134,7 @@ function getUrgencyStyle(urgency: UrgencyLevel) {
     case 'scheduled':
     default:
       return {
-        label: 'In attesa dello scalo',
+        label: kind === 'disembark' ? 'In navigazione verso Genova' : 'In attesa dello scalo',
         sublabel: 'Orario sincronizzato su fuso unico UTC+1 (0 ore di differenza).',
         textColor: 'text-cyan-400',
         ringStroke: '#06b6d4',
@@ -120,8 +149,9 @@ export const CountdownView: React.FC<CountdownViewProps> = ({
   selectedPortId,
   onSelectPortId,
   inspectedCountdown,
-  isBeforeCruise,
+  boardingRemainingMs,
   preCruiseRemainingMs,
+  arrivalRemainingMs,
   todayPortId,
   simulation,
   onAdjustOffset,
@@ -137,9 +167,18 @@ export const CountdownView: React.FC<CountdownViewProps> = ({
 }) => {
   const [isTaxiCardOpen, setIsTaxiCardOpen] = useState(false);
 
-  const { port, isSimulated, isLiveToday, offsetMin, adjustedAllAboardTime, remainingMs, progressPercent, urgency } =
-    inspectedCountdown;
-  const style = getUrgencyStyle(urgency);
+  const {
+    port,
+    isSimulated,
+    isLiveToday,
+    offsetMin,
+    adjustedAllAboardTime,
+    targetLabel,
+    remainingMs,
+    progressPercent,
+    urgency
+  } = inspectedCountdown;
+  const style = getUrgencyStyle(urgency, port.kind);
   const StatusIcon = style.Icon;
 
   // Geometria anello SVG (r = 76)
@@ -172,23 +211,67 @@ export const CountdownView: React.FC<CountdownViewProps> = ({
         </div>
       )}
 
-      {/* Intestazione compatta pre-crociera (prima del 23 nov ore 17:00) */}
-      {isBeforeCruise && !simulation && (
-        <div className="px-4 py-3 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-between gap-3">
-          <div className="min-w-0">
-            <p className="text-xs text-slate-400">Imbarco Genova · 23 nov ore 17:00</p>
-            <p className="text-sm font-bold text-white truncate">Partenza MSC Euribia tra</p>
+      {/* Riepilogo Tappe Chiave Genova: Boarding 14:00 · Partenza 17:00 · Arrivo 30 nov 09:00 */}
+      <section aria-label="Orari chiave imbarco e rientro Genova" className="grid grid-cols-3 gap-2">
+        <button
+          type="button"
+          onClick={() => onSelectPortId('genova-imbarco')}
+          className={`p-2.5 rounded-2xl border text-left transition active:scale-[0.98] ${
+            selectedPortId === 'genova-imbarco'
+              ? 'bg-cyan-950/50 border-cyan-500/70'
+              : 'bg-slate-900 border-slate-800 hover:border-slate-700'
+          }`}
+        >
+          <div className="text-[10px] text-slate-400 truncate">Boarding · 23 nov</div>
+          <div className="font-mono tabular-nums text-sm font-extrabold text-cyan-300 mt-0.5">
+            14:00
           </div>
-          <div className="font-mono tabular-nums text-base sm:text-lg font-extrabold text-cyan-400 shrink-0">
-            {formatCompactDuration(preCruiseRemainingMs)}
+          <div className="font-mono tabular-nums text-[10px] text-slate-300 mt-0.5 truncate">
+            {boardingRemainingMs > 0 ? `tra ${formatCompactDuration(boardingRemainingMs)}` : 'Aperto'}
           </div>
-        </div>
-      )}
+        </button>
 
-      {/* Selettore rapido dei 5 scali */}
-      <section aria-label="Scegli scalo per il countdown" className="bg-slate-900 border border-slate-800 rounded-2xl p-3">
+        <button
+          type="button"
+          onClick={() => onSelectPortId('genova-imbarco')}
+          className={`p-2.5 rounded-2xl border text-left transition active:scale-[0.98] ${
+            selectedPortId === 'genova-imbarco'
+              ? 'bg-cyan-950/50 border-cyan-500/70'
+              : 'bg-slate-900 border-slate-800 hover:border-slate-700'
+          }`}
+        >
+          <div className="text-[10px] text-slate-400 truncate">Partenza · 23 nov</div>
+          <div className="font-mono tabular-nums text-sm font-extrabold text-amber-300 mt-0.5">
+            17:00
+          </div>
+          <div className="font-mono tabular-nums text-[10px] text-slate-300 mt-0.5 truncate">
+            {preCruiseRemainingMs > 0 ? `tra ${formatCompactDuration(preCruiseRemainingMs)}` : 'Salpata'}
+          </div>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onSelectPortId('genova-arrivo')}
+          className={`p-2.5 rounded-2xl border text-left transition active:scale-[0.98] ${
+            selectedPortId === 'genova-arrivo'
+              ? 'bg-cyan-950/50 border-cyan-500/70'
+              : 'bg-slate-900 border-slate-800 hover:border-slate-700'
+          }`}
+        >
+          <div className="text-[10px] text-slate-400 truncate">Arrivo · 30 nov</div>
+          <div className="font-mono tabular-nums text-sm font-extrabold text-emerald-300 mt-0.5">
+            09:00
+          </div>
+          <div className="font-mono tabular-nums text-[10px] text-slate-300 mt-0.5 truncate">
+            {arrivalRemainingMs > 0 ? `tra ${formatCompactDuration(arrivalRemainingMs)}` : 'Arrivata'}
+          </div>
+        </button>
+      </section>
+
+      {/* Selettore rapido: Imbarco Genova + 5 Scali + Arrivo Genova */}
+      <section aria-label="Scegli tappa per il countdown" className="bg-slate-900 border border-slate-800 rounded-2xl p-3">
         <div className="flex items-center justify-between text-xs text-slate-400 mb-2 px-0.5">
-          <span className="font-semibold text-slate-200">Scalo selezionato</span>
+          <span className="font-semibold text-slate-200">Tappa selezionata</span>
           <span>Fuso unico UTC+1 · 100% offline</span>
         </div>
         <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
@@ -208,7 +291,7 @@ export const CountdownView: React.FC<CountdownViewProps> = ({
                 }`}
               >
                 <span>{item.bandiera}</span>
-                <span>{item.citta}</span>
+                <span>{item.tabLabel}</span>
                 {isToday && (
                   <span className={`text-[10px] font-mono ${isSelected ? 'text-slate-900' : 'text-cyan-400'}`}>
                     Oggi
@@ -220,15 +303,15 @@ export const CountdownView: React.FC<CountdownViewProps> = ({
         </div>
       </section>
 
-      {/* Card Principale: Anello Progresso & Orologio Tutti a Bordo */}
+      {/* Card Principale: Anello Progresso & Orologio */}
       <section
-        aria-label={`Countdown Tutti a Bordo ${port.citta}`}
+        aria-label={`Countdown ${port.citta}`}
         className={`rounded-2xl border p-5 transition-colors ${style.surfaceClass} ${style.borderClass}`}
       >
         {/* Metadati puliti senza pillole */}
         <div className="flex items-center justify-between gap-2 text-xs text-slate-400 mb-4">
           <span className="truncate">
-            {port.bandiera} {port.citta} · Giorno {port.giornoNumero}
+            {port.bandiera} {port.citta} · {port.giornoCaption}
           </span>
           <span className="font-mono tabular-nums shrink-0 text-slate-300">
             {isSimulated ? 'Modalità prova attiva' : port.isoDate.split('-').reverse().join('/')}
@@ -263,7 +346,7 @@ export const CountdownView: React.FC<CountdownViewProps> = ({
 
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
               <span className="text-[11px] font-medium text-slate-400 mb-0.5">
-                {isLiveToday || isSimulated ? 'Al Tutti a Bordo' : 'Mancano allo scalo'}
+                {targetLabel}
               </span>
               <span
                 className={`font-mono tabular-nums font-black tracking-tight ${
@@ -286,18 +369,20 @@ export const CountdownView: React.FC<CountdownViewProps> = ({
           </p>
         </div>
 
-        {/* Riga Orari Scalo (3 colonne con cifre tabellari) */}
+        {/* Riga Orari Tappa (3 colonne con cifre tabellari e label contestuali) */}
         <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-slate-800/80 text-center">
           <div>
-            <div className="text-[11px] text-slate-400">Attracco</div>
+            <div className="text-[11px] text-slate-400">{port.col1Label}</div>
             <div className="font-mono tabular-nums text-base font-bold text-slate-200 mt-0.5">
-              {port.orarioAttracco}
+              {port.kind === 'port' ? port.orarioAttracco : shiftTimeString(port.orarioAttracco, offsetMin)}
             </div>
           </div>
           <div>
-            <div className="text-[11px] font-semibold text-amber-400">Tutti a Bordo</div>
+            <div className="text-[11px] font-semibold text-amber-400">{port.col2Label}</div>
             <div className="font-mono tabular-nums text-lg font-black text-amber-300 mt-0.5">
-              {adjustedAllAboardTime}
+              {port.kind === 'embark'
+                ? shiftTimeString(port.orarioTuttiABordo, offsetMin)
+                : adjustedAllAboardTime}
             </div>
             {offsetMin !== 0 && (
               <div className="text-[10px] font-mono text-amber-400/90">
@@ -306,9 +391,9 @@ export const CountdownView: React.FC<CountdownViewProps> = ({
             )}
           </div>
           <div>
-            <div className="text-[11px] text-slate-400">Partenza</div>
+            <div className="text-[11px] text-slate-400">{port.col3Label}</div>
             <div className="font-mono tabular-nums text-base font-bold text-slate-200 mt-0.5">
-              {port.orarioPartenza}
+              {shiftTimeString(port.orarioPartenza, offsetMin)}
             </div>
           </div>
         </div>
@@ -356,10 +441,10 @@ export const CountdownView: React.FC<CountdownViewProps> = ({
           className="w-full min-h-[48px] px-4 py-3 rounded-2xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-extrabold text-sm flex items-center justify-center gap-2 transition active:scale-[0.98] shadow-md shadow-cyan-950/40"
         >
           <Navigation className="w-4 h-4 stroke-[2.5] shrink-0" />
-          <span>Apri Rientro al Molo su Google Maps</span>
+          <span>{port.mapsCtaLabel}</span>
         </a>
 
-        <div className="grid grid-cols-2 gap-2.5">
+        <div className={`grid gap-2.5 ${port.hasItinerary ? 'grid-cols-2' : 'grid-cols-1'}`}>
           <button
             type="button"
             onClick={() => setIsTaxiCardOpen(true)}
@@ -369,14 +454,16 @@ export const CountdownView: React.FC<CountdownViewProps> = ({
             <span>Mostra al Tassista</span>
           </button>
 
-          <button
-            type="button"
-            onClick={() => onOpenPortItinerary(port.portId)}
-            className="min-h-[48px] px-3 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-100 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition active:scale-[0.98]"
-          >
-            <span>Tappe {port.citta}</span>
-            <ArrowRight className="w-4 h-4 text-cyan-400 shrink-0" />
-          </button>
+          {port.hasItinerary && (
+            <button
+              type="button"
+              onClick={() => onOpenPortItinerary(port.portId)}
+              className="min-h-[48px] px-3 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-100 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition active:scale-[0.98]"
+            >
+              <span>Tappe {port.citta}</span>
+              <ArrowRight className="w-4 h-4 text-cyan-400 shrink-0" />
+            </button>
+          )}
         </div>
       </section>
 
