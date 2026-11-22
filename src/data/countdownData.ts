@@ -524,3 +524,134 @@ export function computePortCountdown(
     urgency
   };
 }
+
+export type NextEventKind = 'checkin' | 'disembark' | 'all-aboard' | 'departure' | 'arrival';
+
+export interface NextCruiseEvent {
+  kind: NextEventKind;
+  portId: string;
+  shortLabel: string;
+  timeLabel: string;
+  targetMs: number;
+  remainingMs: number;
+  urgency: UrgencyLevel;
+  isSimulated: boolean;
+}
+
+/**
+ * Restituisce automaticamente il prossimo evento cronologico della crociera
+ * (Check-in Genova 14:00 → Partenza Genova 17:00 → Discesa Napoli → A bordo Napoli →
+ * Partenza Napoli → ... → Arrivo Genova 30 nov 09:00).
+ */
+export function getNextCruiseEvent(
+  nowMs: number,
+  portOffsetsMin: Record<string, number> = {},
+  simulation?: { portId: string; targetMs: number; windowMs: number } | null
+): NextCruiseEvent | null {
+  if (simulation) {
+    const simPort = PORT_SCHEDULE_MAP[simulation.portId] || PORT_RETURN_SCHEDULES[0];
+    const remainingMs = Math.max(0, simulation.targetMs - nowMs);
+    const shortCity = simPort.citta.split('(')[0].trim();
+    const kind: NextEventKind =
+      simPort.kind === 'embark'
+        ? 'checkin'
+        : simPort.kind === 'disembark'
+        ? 'arrival'
+        : 'all-aboard';
+    const shortLabel =
+      simPort.kind === 'embark'
+        ? 'Check-in Genova'
+        : simPort.kind === 'disembark'
+        ? 'Arrivo Genova'
+        : `A bordo ${shortCity}`;
+
+    return {
+      kind,
+      portId: simPort.portId,
+      shortLabel,
+      timeLabel: 'Prova',
+      targetMs: simulation.targetMs,
+      remainingMs,
+      urgency: getUrgencyFromRemainingMs(remainingMs),
+      isSimulated: true
+    };
+  }
+
+  const events: Array<{
+    kind: NextEventKind;
+    portId: string;
+    shortLabel: string;
+    timeLabel: string;
+    targetMs: number;
+  }> = [];
+
+  for (const item of PORT_RETURN_SCHEDULES) {
+    const offset = portOffsetsMin[item.portId] || 0;
+    const shortCity = item.portId === 'la-goletta' ? 'Tunisi' : item.citta.split('(')[0].trim();
+
+    if (item.kind === 'embark') {
+      events.push({
+        kind: 'checkin',
+        portId: item.portId,
+        shortLabel: 'Check-in Genova',
+        timeLabel: shiftTimeString(item.orarioAttracco, offset),
+        targetMs: parseCruiseTimestamp(item.isoDate, item.orarioAttracco, offset)
+      });
+      events.push({
+        kind: 'departure',
+        portId: item.portId,
+        shortLabel: 'Partenza Genova',
+        timeLabel: shiftTimeString(item.orarioPartenza, offset),
+        targetMs: parseCruiseTimestamp(item.isoDate, item.orarioPartenza, offset)
+      });
+    } else if (item.kind === 'disembark') {
+      events.push({
+        kind: 'arrival',
+        portId: item.portId,
+        shortLabel: 'Arrivo Genova',
+        timeLabel: shiftTimeString(item.orarioAttracco, offset),
+        targetMs: parseCruiseTimestamp(item.isoDate, item.orarioAttracco, offset)
+      });
+    } else {
+      events.push({
+        kind: 'disembark',
+        portId: item.portId,
+        shortLabel: `Discesa ${shortCity}`,
+        timeLabel: item.orarioAttracco,
+        targetMs: parseCruiseTimestamp(item.isoDate, item.orarioAttracco, 0)
+      });
+      events.push({
+        kind: 'all-aboard',
+        portId: item.portId,
+        shortLabel: `A bordo ${shortCity}`,
+        timeLabel: shiftTimeString(item.orarioTuttiABordo, offset),
+        targetMs: parseCruiseTimestamp(item.isoDate, item.orarioTuttiABordo, offset)
+      });
+      events.push({
+        kind: 'departure',
+        portId: item.portId,
+        shortLabel: `Partenza ${shortCity}`,
+        timeLabel: shiftTimeString(item.orarioPartenza, offset),
+        targetMs: parseCruiseTimestamp(item.isoDate, item.orarioPartenza, offset)
+      });
+    }
+  }
+
+  events.sort((a, b) => a.targetMs - b.targetMs);
+  const next = events.find(e => e.targetMs > nowMs);
+  if (!next) return null;
+
+  const remainingMs = next.targetMs - nowMs;
+  const urgency: UrgencyLevel =
+    next.kind === 'all-aboard' || remainingMs <= 90 * 60_000
+      ? getUrgencyFromRemainingMs(remainingMs)
+      : 'scheduled';
+
+  return {
+    ...next,
+    remainingMs,
+    urgency,
+    isSimulated: false
+  };
+}
+

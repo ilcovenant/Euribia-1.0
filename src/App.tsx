@@ -25,7 +25,8 @@ import {
   ChevronLeft, 
   Route,
   CheckCircle2,
-  Timer
+  Timer,
+  Compass
 } from 'lucide-react';
 
 const STORAGE_KEY = 'msc_checked_stops_v1';
@@ -73,6 +74,7 @@ export default function App() {
   const [isCruiseModalOpen, setIsCruiseModalOpen] = useState(false);
   const [isOfflineModalOpen, setIsOfflineModalOpen] = useState(false);
   const [selectedWikiSlug, setSelectedWikiSlug] = useState<string | null>(null);
+  const [tunisiaTab, setTunisiaTab] = useState<'itinerario' | 'kit'>('itinerario');
 
   const countdown = useAllAboardCountdown(lastPortId);
 
@@ -197,6 +199,17 @@ export default function App() {
       {/* Header Mobile First */}
       <Header
         currentPortName={isCountdownView ? 'Tutti a Bordo' : isSeaDayView ? 'Navigazione' : activePort.citta}
+        nextEvent={countdown.nextCruiseEvent}
+        onClickNextEvent={() => {
+          if (countdown.nextCruiseEvent) {
+            countdown.setSelectedPortId(countdown.nextCruiseEvent.portId);
+          }
+          setActiveViewId('countdown');
+          if (typeof window !== 'undefined') {
+            window.location.hash = 'countdown';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        }}
         onOpenCruiseInfo={() => setIsCruiseModalOpen(true)}
         onDownloadOfflineBundle={() => setIsOfflineModalOpen(true)}
       />
@@ -345,53 +358,155 @@ export default function App() {
               </section>
             )}
 
-            {/* Scheda Logistica del Porto */}
-            <LogisticsCard
-              port={activePort}
-              checkedStops={currentPortCheckedIds}
-            />
-
-            {/* Suite Offline per Tunisia (La Goletta) */}
+            {/* Selettore Scheda Giorno 4 La Goletta: Itinerario vs Kit Sopravvivenza Offline */}
             {activePort.id === 'la-goletta' && (
-              <TunisiaOfflineSuite
-                onOpenWiki={(slug) => setSelectedWikiSlug(slug)}
-              />
+              <section
+                aria-label="Scegli scheda La Goletta"
+                className="bg-slate-900/95 border border-cyan-500/35 rounded-2xl p-3.5 shadow-lg no-print"
+              >
+                <div className="flex items-center justify-between gap-2 mb-2.5">
+                  <div className="flex items-center gap-2">
+                    <Compass className="w-4 h-4 text-cyan-400 shrink-0" />
+                    <h2 className="text-xs font-extrabold uppercase tracking-wider text-cyan-300">
+                      Sezione Giorno 4 · Tunisia
+                    </h2>
+                  </div>
+                  <span className="text-[10px] font-mono text-slate-400">
+                    2 schede pronte
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setTunisiaTab('itinerario')}
+                    aria-pressed={tunisiaTab === 'itinerario'}
+                    className={`text-left rounded-xl p-3 border transition-all active:scale-[0.98] ${
+                      tunisiaTab === 'itinerario'
+                        ? 'bg-cyan-500/15 border-cyan-400 text-white shadow-md shadow-cyan-500/10'
+                        : 'bg-slate-950/75 border-slate-800 text-slate-300 hover:border-slate-700 hover:bg-slate-950'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <span
+                        className={`text-[10px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${
+                          tunisiaTab === 'itinerario'
+                            ? 'bg-cyan-500 text-slate-950'
+                            : 'bg-slate-800 text-slate-400'
+                        }`}
+                      >
+                        Scheda A
+                      </span>
+                      {tunisiaTab === 'itinerario' && (
+                        <CheckCircle2 className="w-4 h-4 text-cyan-400 shrink-0" />
+                      )}
+                    </div>
+                    <div className="text-sm font-extrabold leading-snug text-white">
+                      Itinerario La Goletta
+                    </div>
+                    <div className={`text-[11px] font-mono mt-0.5 ${tunisiaTab === 'itinerario' ? 'text-cyan-300' : 'text-slate-400'}`}>
+                      Sidi Bou Saïd + Cartagine • {activePort.kmTotaliStimati} km
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setTunisiaTab('kit')}
+                    aria-pressed={tunisiaTab === 'kit'}
+                    className={`text-left rounded-xl p-3 border transition-all active:scale-[0.98] ${
+                      tunisiaTab === 'kit'
+                        ? 'bg-cyan-500/15 border-cyan-400 text-white shadow-md shadow-cyan-500/10'
+                        : 'bg-slate-950/75 border-slate-800 text-slate-300 hover:border-slate-700 hover:bg-slate-950'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <span
+                        className={`text-[10px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${
+                          tunisiaTab === 'kit'
+                            ? 'bg-cyan-500 text-slate-950'
+                            : 'bg-slate-800 text-slate-400'
+                        }`}
+                      >
+                        Scheda B
+                      </span>
+                      {tunisiaTab === 'kit' && (
+                        <CheckCircle2 className="w-4 h-4 text-cyan-400 shrink-0" />
+                      )}
+                    </div>
+                    <div className="text-sm font-extrabold leading-snug text-white">
+                      Kit Sopravvivenza Offline
+                    </div>
+                    <div className={`text-[11px] font-mono mt-0.5 ${tunisiaTab === 'kit' ? 'text-cyan-300' : 'text-slate-400'}`}>
+                      Wiki • Cambio TND • Frasario
+                    </div>
+                  </button>
+                </div>
+              </section>
             )}
 
-            {/* Card Esperienza Gastronomica Cult (condizionale) */}
-            <FoodCard
-              sostaGolosa={activePort.sostaGolosaTop}
-            />
-
-            {/* Timeline Tappe ad Anello */}
-            <section 
-              aria-label="Tappe dell'itinerario a piedi"
-              className="pt-2"
-            >
-              <div className="flex items-center justify-between mb-3 px-1">
-                <h3 className="font-extrabold text-sm text-white uppercase tracking-wider flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-cyan-400"></span>
-                  Circuito Tappe ad Anello
-                </h3>
-                <span className="text-xs font-mono text-slate-400">
-                  {activePort.tappe.length} fermate ({activePort.kmTotaliStimati} km)
-                </span>
+            {activePort.id === 'la-goletta' && tunisiaTab === 'kit' ? (
+              <div className="space-y-4">
+                <TunisiaOfflineSuite
+                  onOpenWiki={(slug) => setSelectedWikiSlug(slug)}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTunisiaTab('itinerario');
+                    if (typeof window !== 'undefined') {
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                  }}
+                  className="w-full min-h-[46px] px-4 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-cyan-300 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition active:scale-[0.98] no-print"
+                >
+                  <ChevronLeft className="w-4 h-4 shrink-0" />
+                  <span>Torna all’Itinerario La Goletta</span>
+                </button>
               </div>
+            ) : (
+              <>
+                {/* Scheda Logistica del Porto */}
+                <LogisticsCard
+                  port={activePort}
+                  checkedStops={currentPortCheckedIds}
+                />
 
-              <div className="space-y-0">
-                {activePort.tappe.map((stop, idx) => (
-                  <StopCard
-                    key={stop.id}
-                    stop={stop}
-                    index={idx}
-                    totalStops={activePort.tappe.length}
-                    isChecked={!!checkedStops[stop.id]}
-                    onToggleCheck={handleToggleCheck}
-                    onOpenWiki={(slug) => setSelectedWikiSlug(slug)}
-                  />
-                ))}
-              </div>
-            </section>
+                {/* Card Esperienza Gastronomica Cult (stile FAQ chiudibile) */}
+                <FoodCard
+                  sostaGolosa={activePort.sostaGolosaTop}
+                />
+
+                {/* Timeline Tappe ad Anello */}
+                <section 
+                  aria-label="Tappe dell'itinerario a piedi"
+                  className="pt-2"
+                >
+                  <div className="flex items-center justify-between mb-3 px-1">
+                    <h3 className="font-extrabold text-sm text-white uppercase tracking-wider flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-cyan-400"></span>
+                      Circuito Tappe ad Anello
+                    </h3>
+                    <span className="text-xs font-mono text-slate-400">
+                      {activePort.tappe.length} fermate ({activePort.kmTotaliStimati} km)
+                    </span>
+                  </div>
+
+                  <div className="space-y-0">
+                    {activePort.tappe.map((stop, idx) => (
+                      <StopCard
+                        key={stop.id}
+                        stop={stop}
+                        index={idx}
+                        totalStops={activePort.tappe.length}
+                        isChecked={!!checkedStops[stop.id]}
+                        onToggleCheck={handleToggleCheck}
+                        onOpenWiki={(slug) => setSelectedWikiSlug(slug)}
+                      />
+                    ))}
+                  </div>
+                </section>
+              </>
+            )}
 
             {/* Navigazione Veloce tra Giorni Precedente / Successivo (incluso G5 Navigazione tra G4 e G6) */}
             <nav 

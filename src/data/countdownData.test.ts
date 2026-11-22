@@ -15,7 +15,8 @@ import {
   getUrgencyFromRemainingMs,
   formatDurationHms,
   formatCompactDuration,
-  computePortCountdown
+  computePortCountdown,
+  getNextCruiseEvent
 } from './countdownData';
 
 test('PORT_RETURN_SCHEDULES covers Genova Embark, 5 ports, and Genova Arrival with valid taxi cards', () => {
@@ -118,4 +119,49 @@ test('computePortCountdown handles Genova Boarding 14:00, Departure 17:00, Arriv
   assert.equal(shifted.adjustedAllAboardTime, '16:45');
   assert.equal(shifted.urgency, 'critical');
   assert.equal(shifted.remainingMs, 45 * 60_000);
+});
+
+test('getNextCruiseEvent transitions automatically across Check-in, Departure, Disembark, All Aboard, and Arrival', () => {
+  // 1) Before Genova Check-in (22 Nov) -> Check-in Genova 14:00
+  const ev1 = getNextCruiseEvent(parseCruiseTimestamp('2026-11-22', '10:00'));
+  assert.equal(ev1?.shortLabel, 'Check-in Genova');
+  assert.equal(ev1?.timeLabel, '14:00');
+  assert.equal(ev1?.portId, 'genova-imbarco');
+
+  // 2) After 14:00 on 23 Nov -> Partenza Genova 17:00
+  const ev2 = getNextCruiseEvent(parseCruiseTimestamp('2026-11-23', '14:30'));
+  assert.equal(ev2?.shortLabel, 'Partenza Genova');
+  assert.equal(ev2?.timeLabel, '17:00');
+
+  // 3) After 17:00 on 23 Nov -> Discesa Napoli 13:00
+  const ev3 = getNextCruiseEvent(parseCruiseTimestamp('2026-11-23', '18:00'));
+  assert.equal(ev3?.shortLabel, 'Discesa Napoli');
+  assert.equal(ev3?.timeLabel, '13:00');
+  assert.equal(ev3?.portId, 'napoli');
+
+  // 4) Ashore in Napoli (24 Nov 15:00) -> A bordo Napoli 19:15
+  const ev4 = getNextCruiseEvent(parseCruiseTimestamp('2026-11-24', '15:00'));
+  assert.equal(ev4?.shortLabel, 'A bordo Napoli');
+  assert.equal(ev4?.timeLabel, '19:15');
+
+  // 5) Between All Aboard and Departure in Napoli (24 Nov 19:30) -> Partenza Napoli 20:00
+  const ev5 = getNextCruiseEvent(parseCruiseTimestamp('2026-11-24', '19:30'));
+  assert.equal(ev5?.shortLabel, 'Partenza Napoli');
+  assert.equal(ev5?.timeLabel, '20:00');
+
+  // 6) Sea Day (27 Nov 12:00) -> Discesa Barcellona 08:00
+  const ev6 = getNextCruiseEvent(parseCruiseTimestamp('2026-11-27', '12:00'));
+  assert.equal(ev6?.shortLabel, 'Discesa Barcellona');
+  assert.equal(ev6?.timeLabel, '08:00');
+  assert.equal(ev6?.portId, 'barcellona');
+
+  // 7) After Marsiglia departure (29 Nov 19:00) -> Arrivo Genova 09:00
+  const ev7 = getNextCruiseEvent(parseCruiseTimestamp('2026-11-29', '19:00'));
+  assert.equal(ev7?.shortLabel, 'Arrivo Genova');
+  assert.equal(ev7?.timeLabel, '09:00');
+  assert.equal(ev7?.portId, 'genova-arrivo');
+
+  // 8) After arrival (30 Nov 10:00) -> null
+  const ev8 = getNextCruiseEvent(parseCruiseTimestamp('2026-11-30', '10:00'));
+  assert.equal(ev8, null);
 });

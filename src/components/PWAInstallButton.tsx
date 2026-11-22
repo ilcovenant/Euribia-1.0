@@ -23,10 +23,10 @@ export const PWAInstallButton: React.FC = () => {
         onClick={install}
         aria-label="Installa App PWA sul dispositivo"
         title="Installa come app offline sul telefono"
-        className="flex items-center gap-1 text-[11px] font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 px-2.5 py-1.5 rounded-xl transition active:scale-95 shadow-sm shadow-emerald-950/40"
+        className="w-8 h-8 sm:w-auto sm:h-auto sm:px-2.5 sm:py-1.5 flex items-center justify-center gap-1 text-[11px] font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-xl transition active:scale-95 shadow-sm shadow-emerald-950/40 shrink-0"
       >
-        <Smartphone className="w-3.5 h-3.5 stroke-[2.4]" />
-        <span>Installa</span>
+        <Smartphone className="w-4 h-4 sm:w-3.5 sm:h-3.5 stroke-[2.4]" />
+        <span className="hidden sm:inline">Installa</span>
       </button>
     );
   }
@@ -39,10 +39,10 @@ export const PWAInstallButton: React.FC = () => {
           onClick={() => setShowGuideModal(true)}
           aria-label="Come installare l'App PWA"
           title="Installa come App Offline"
-          className="flex items-center gap-1 text-[11px] font-bold bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-700/80 px-2 py-1.5 rounded-xl transition active:scale-95 shrink-0"
+          className="w-8 h-8 sm:w-auto sm:h-auto sm:px-2 sm:py-1.5 flex items-center justify-center gap-1 text-[11px] font-bold bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-700/80 rounded-xl transition active:scale-95 shrink-0"
         >
-          <Smartphone className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-          <span>Installa</span>
+          <Smartphone className="w-4 h-4 sm:w-3.5 sm:h-3.5 text-emerald-400 shrink-0" />
+          <span className="hidden sm:inline">Installa</span>
         </button>
 
         {showGuideModal && (

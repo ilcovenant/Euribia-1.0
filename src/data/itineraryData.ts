@@ -354,12 +354,12 @@ export const itineraryData: PortItinerary[] = [
     kmTotaliStimati: 7.2,
     infoLogisticaMolo: {
       nomeMolo: 'Goulette Village Cruise Terminal',
-      collegamentoPortoCitta: 'Gare La Goulette Vieille (750m a piedi) + Treno TGM & Rientro Bolt/TGM',
-      mezzoConsigliato: 'Treno TGM andata (1ère classe ~0.35€) + TGM o Bolt al ritorno (~1.80€ totali per 4 persone)',
-      costoTransfer: '~2.50 € - 3.50 € a testa per tutti i trasporti della giornata (TGM + Bolt)',
+      collegamentoPortoCitta: 'Gare La Goulette Vieille (750m a piedi) + Treno TGM & Rientro TGM / Taxi giallo o inDrive',
+      mezzoConsigliato: 'Treno TGM andata e ritorno (1ère classe ~0.35€) + eventuale taxi giallo a tassametro o app inDrive (~2-3€ totali per 4 persone)',
+      costoTransfer: '~1.50 € - 3.00 € a testa per tutti i trasporti della giornata (TGM + eventuale taxi/inDrive)',
       tempoTransferMinuti: 25,
-      istruzioniDettagliate: 'Strategia a imbuto anticoda e antirischio: all\'uscita del molo cambia circa 20€ a testa in Dinari Tunisini (TND) agli sportelli bancari ufficiali interni al Goulette Cruise Terminal. Esci dai cancelli e cammina per soli 750 metri (9 minuti a piedi su Rue des Ramparts / Rue Hédi Chaker) fino alla stazione "Gare de la Goulette Vieille" (la più vicina al molo, a differenza di Casino che dista 2.2 km). Prendi il treno TGM verso nord fino al capolinea di Sidi Bou Saïd. Al pomeriggio scendi di 6 fermate TGM fino a Carthage Salammbô per esplorare i Porti Punici (Cothon) e il misterioso Tophet. Infine rientra con una rapida corsa Bolt da 8 minuti (~1.80€ in 4) a La Goletta, trascorrendo l\'ultima ora e mezza a meno di 600m dalla nave tra la fortezza Borj el-Karraka e la Piccola Sicilia, azzerando qualsiasi ansia da ritardo!',
-      consiglioRisparmio: 'Rifiuta categoricamente i taxi turistici all\'interno del terminal (chiedono fino a 80-120€ a persona). I biglietti 1ère classe TGM costano solo 1.20 TND (~0.35€) e l\'app Bolt ha tariffe trasparenti fisse in dinari senza contrattazioni estenuanti.'
+      istruzioniDettagliate: 'Strategia a imbuto anticoda e antirischio: all\'uscita del molo cambia circa 20€ a testa in Dinari Tunisini (TND) agli sportelli bancari ufficiali interni al Goulette Cruise Terminal. Esci dai cancelli e cammina per soli 750 metri (9 minuti a piedi su Rue des Ramparts / Rue Hédi Chaker) fino alla stazione "Gare de la Goulette Vieille" (la più vicina al molo, a differenza di Casino che dista 2.2 km). Prendi il treno TGM verso nord fino al capolinea di Sidi Bou Saïd. Al pomeriggio scendi di 6 fermate TGM fino a Carthage Salammbô per esplorare i Porti Punici (Cothon) e il misterioso Tophet. Infine rientra a La Goletta con 3 fermate di TGM (6 min) oppure un taxi giallo con tassametro / app inDrive (~6-10 TND / ~2-3€ totali in 4), trascorrendo l\'ultima ora e mezza a meno di 600m dalla nave tra la fortezza Borj el-Karraka e la Piccola Sicilia, azzerando qualsiasi ansia da ritardo!',
+      consiglioRisparmio: 'Rifiuta categoricamente i taxi turistici all\'interno del terminal (chiedono fino a 80-120€ a persona). Nota importante: Bolt non opera più in Tunisia (servizio chiuso nel 2025). I mezzi più affidabili ed economici sono il treno TGM (1.20 TND ~0.35€ in 1ère classe, 100% senza internet), i taxi gialli su strada chiedendo sempre il tassametro ("compteur") oppure l\'app inDrive (se avete eSIM/dati mobili).'
     },
     sostaGolosaTop: {
       locale: 'Bottega del Bambalouni & Café des Nattes (Sidi Bou Said)',
@@ -434,7 +434,7 @@ export const itineraryData: PortItinerary[] = [
         id: 'lg-5',
         orario: '15:30 - 16:55',
         nome: 'La Goletta: Fortezza Borj el-Karraka, Piccola Sicilia & Paranza',
-        descrizione: 'Dal Tophet, corsa rapida in auto via app Bolt (o treno TGM da Salammbô) verso Avenue Franklin Roosevelt a La Goletta (~3 km, circa 8 minuti di auto, 5-7 TND / ~1.80€ per l\'intera vettura in 4). Visita alla fortezza Borj el-Karraka (1535), passeggiata nel quartiere della Piccola Sicilia davanti alla Chiesa di Sant\'Agostino e San Fedele, e sosta sul lungomare per un caffè turco all\'acqua di fiori d\'arancio (zahar) o un cartoccio di paranza fritta appena pescata, a soli 600m dalla nave.',
+        descrizione: 'Dal Tophet, rientro rapido verso Avenue Franklin Roosevelt a La Goletta (~3 km): in treno TGM dalla vicina stazione Carthage Salammbô (3 fermate, ~6 min, ~0.35€) oppure con un taxi giallo su strada con tassametro / app inDrive (6-10 TND / ~2-3€ per l\'intera auto in 4; nota: Bolt non è attivo in Tunisia). Visita alla fortezza Borj el-Karraka (1535), passeggiata nel quartiere della Piccola Sicilia davanti alla Chiesa di Sant\'Agostino e San Fedele, e sosta sul lungomare per un caffè turco all\'acqua di fiori d\'arancio (zahar) o un cartoccio di paranza fritta appena pescata, a soli 600m dalla nave.',
         tipologia: 'Nerd/Pop',
         kmParziali: 2.0,
         durataMinuti: 85,

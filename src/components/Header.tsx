@@ -4,18 +4,27 @@
  */
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Ship, Info, Printer, Download, MoreVertical } from 'lucide-react';
+import { Ship, Info, Printer, Download, MoreVertical, Clock } from 'lucide-react';
 import { PWAInstallButton } from './PWAInstallButton';
+import {
+  NextCruiseEvent,
+  formatCompactDuration,
+  formatDurationHms
+} from '../data/countdownData';
 
 interface HeaderProps {
   onOpenCruiseInfo: () => void;
   onDownloadOfflineBundle: () => void;
   currentPortName: string;
+  nextEvent: NextCruiseEvent | null;
+  onClickNextEvent: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   onOpenCruiseInfo,
-  onDownloadOfflineBundle
+  onDownloadOfflineBundle,
+  nextEvent,
+  onClickNextEvent
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -41,28 +50,82 @@ export const Header: React.FC<HeaderProps> = ({
     onDownloadOfflineBundle();
   };
 
+  const getNextEventTone = (ev: NextCruiseEvent) => {
+    if (ev.urgency === 'critical' || ev.urgency === 'expired') {
+      return {
+        box: 'bg-rose-950/70 border-rose-600/80 hover:border-rose-500',
+        label: 'text-rose-300',
+        time: 'text-white'
+      };
+    }
+    if (ev.kind === 'all-aboard' || ev.kind === 'departure' || ev.urgency === 'caution') {
+      return {
+        box: 'bg-amber-950/45 border-amber-700/70 hover:border-amber-500',
+        label: 'text-amber-300',
+        time: 'text-white'
+      };
+    }
+    if (ev.kind === 'arrival') {
+      return {
+        box: 'bg-emerald-950/45 border-emerald-700/70 hover:border-emerald-500',
+        label: 'text-emerald-300',
+        time: 'text-white'
+      };
+    }
+    return {
+      box: 'bg-slate-900/95 border-cyan-800/70 hover:border-cyan-500/80',
+      label: 'text-cyan-300',
+      time: 'text-white'
+    };
+  };
+
+  const nextEventTone = nextEvent ? getNextEventTone(nextEvent) : null;
+  const formattedNextRemaining = nextEvent
+    ? nextEvent.remainingMs < 24 * 3_600_000
+      ? formatDurationHms(nextEvent.remainingMs)
+      : formatCompactDuration(nextEvent.remainingMs)
+    : '';
+
   return (
-    <header className="sticky top-0 z-30 bg-slate-950/95 backdrop-blur-md border-b border-slate-800/80 px-3 sm:px-4 py-2.5 select-none no-print">
+    <header className="sticky top-0 z-30 bg-slate-950/95 backdrop-blur-md border-b border-slate-800/80 px-2.5 sm:px-4 py-2 select-none no-print">
       <div className="max-w-xl mx-auto flex items-center justify-between gap-2">
-        {/* Logo & Titolo (sempre leggibile anche su schermi 360px) */}
-        <div className="flex items-center gap-2 min-w-0">
-          <div className="w-9 h-9 shrink-0 rounded-xl bg-gradient-to-tr from-cyan-600 to-blue-500 flex items-center justify-center text-slate-950 shadow-md shadow-cyan-900/30 font-bold">
-            <Ship className="w-5 h-5 text-slate-950 stroke-[2.2]" />
+        {/* Logo & Titolo compatto su mobile */}
+        <div className="flex items-center gap-2 shrink-0">
+          <div className="w-8 h-8 sm:w-9 sm:h-9 shrink-0 rounded-xl bg-gradient-to-tr from-cyan-600 to-blue-500 flex items-center justify-center text-slate-950 shadow-md shadow-cyan-900/30 font-bold">
+            <Ship className="w-4 h-4 sm:w-5 sm:h-5 text-slate-950 stroke-[2.2]" />
           </div>
           <div className="min-w-0">
-            <div className="flex items-center gap-1.5">
-              <h1 className="font-extrabold text-sm sm:text-base text-white tracking-tight truncate">
-                MSC Euribia
-              </h1>
-              <span className="hidden sm:inline-block shrink-0 text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-cyan-950 text-cyan-300 border border-cyan-800/70 font-semibold">
-                7 Notti
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-400 font-medium truncate">
-              23–30 Nov • 4 Amici
+            <h1 className="font-extrabold text-xs sm:text-sm text-white tracking-tight leading-tight whitespace-nowrap">
+              MSC Euribia
+            </h1>
+            <p className="text-[10px] text-slate-400 font-medium leading-tight whitespace-nowrap">
+              23–30 Nov
             </p>
           </div>
         </div>
+
+        {/* Countdown Live Prossima Tappa / Discesa / Partenza nello spazio centrale */}
+        {nextEvent && nextEventTone && (
+          <button
+            type="button"
+            onClick={onClickNextEvent}
+            title={`Prossimo evento: ${nextEvent.shortLabel} (${nextEvent.timeLabel}) — tocca per aprire il timer`}
+            className={`min-w-0 flex-1 max-w-[180px] sm:max-w-[205px] px-2.5 py-1 rounded-xl border text-left transition active:scale-[0.98] ${nextEventTone.box}`}
+          >
+            <div className={`text-[10px] font-bold leading-tight truncate flex items-center gap-1 ${nextEventTone.label}`}>
+              <Clock className="w-2.5 h-2.5 shrink-0" />
+              <span className="truncate">{nextEvent.shortLabel}</span>
+            </div>
+            <div className="flex items-baseline justify-between gap-1 mt-0.5">
+              <span className={`font-mono tabular-nums text-[11px] sm:text-xs font-extrabold leading-none ${nextEventTone.time}`}>
+                {formattedNextRemaining}
+              </span>
+              <span className="font-mono tabular-nums text-[9px] text-slate-400 leading-none shrink-0">
+                {nextEvent.timeLabel}
+              </span>
+            </div>
+          </button>
+        )}
 
         {/* Pulsanti Azioni Rapide */}
         <div className="flex items-center gap-1.5 shrink-0">

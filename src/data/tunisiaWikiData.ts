@@ -110,7 +110,7 @@ export const TUNISIA_CURRENCY = {
     { tnd: 5.00, eur: 1.49, label: 'Thé aux Pignons al Café des Nattes' },
     { tnd: 6.00, eur: 1.79, label: 'Chapati tunisien farcito caldo' },
     { tnd: 12.00, eur: 3.58, label: 'Pass archeologico Porti Punici + Tophet' },
-    { tnd: 15.00, eur: 4.48, label: 'Corsa Bolt in auto per 4 persone' },
+    { tnd: 15.00, eur: 4.48, label: 'Taxi giallo (tassametro) / inDrive (4 pers.)' },
     { tnd: 30.00, eur: 8.95, label: 'Fritto di paranza abbondante sul molo' }
   ]
 };

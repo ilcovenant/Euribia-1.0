@@ -632,7 +632,7 @@ export function generateSingleHtmlBundle(itineraries: PortItinerary[]): string {
           '<div style="font-weight:bold; font-size:13px; color:#fca5a5; margin-bottom:4px;">⚠️ Limite Improrogabile: Tutti a Bordo ore 17:15</div>' +
           '<p style="margin-bottom:8px;">La nave chiude la passerella e salpa alle 18:00. Dalle 15:30 in poi sarete già a La Goletta a 600m dalla nave.</p>' +
           '<div style="background:#020617; border:1px solid #7f1d1d; border-radius:8px; padding:8px; margin-bottom:8px; font-family:monospace; font-size:11px;">' +
-            '<strong>Destinazione Taxi / Bolt:</strong><br>' +
+            '<strong>Destinazione Taxi Giallo / inDrive:</strong><br>' +
             'Terminal Croisières - Goulette Village<br>' +
             'Port de La Goulette (Halq al-Wadi)' +
           '</div>' +

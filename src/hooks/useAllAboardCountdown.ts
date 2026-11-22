@@ -12,7 +12,9 @@ import {
   CRUISE_ARRIVAL_MS,
   findTodayPort,
   computePortCountdown,
-  ComputedCountdown
+  getNextCruiseEvent,
+  ComputedCountdown,
+  NextCruiseEvent
 } from '../data/countdownData';
 
 const OFFSETS_STORAGE_KEY = 'msc_all_aboard_offsets_v1';
@@ -231,6 +233,7 @@ export function useAllAboardCountdown(currentAppPortId?: string) {
   const arrivalRemainingMs = Math.max(0, CRUISE_ARRIVAL_MS - nowMs);
   const isBeforeBoarding = nowMs < CRUISE_BOARDING_MS;
   const isBeforeCruise = nowMs < CRUISE_DEPARTURE_MS;
+  const nextCruiseEvent: NextCruiseEvent | null = getNextCruiseEvent(nowMs, portOffsetsMin, simulation);
 
   // Trigger avviso offline quando il countdown live scende sotto la soglia scelta
   useEffect(() => {
@@ -256,6 +259,7 @@ export function useAllAboardCountdown(currentAppPortId?: string) {
     setSelectedPortId,
     inspectedCountdown,
     activeLiveCountdown,
+    nextCruiseEvent,
     isBeforeBoarding,
     isBeforeCruise,
     boardingRemainingMs,

@@ -327,7 +327,7 @@ export const TunisiaOfflineSuite: React.FC<TunisiaOfflineSuiteProps> = ({ onOpen
             <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3 text-xs sm:text-sm">
               <h4 className="font-bold text-white flex items-center gap-1.5">
                 <MapPin className="w-4 h-4 text-cyan-400" />
-                Indirizzo di Rientro per Taxi o Bolt:
+                Indirizzo di Rientro per Taxi Giallo o inDrive:
               </h4>
               <div className="p-3 rounded-xl bg-slate-900 border border-slate-700/80 font-mono text-xs text-cyan-200">
                 <strong>Terminal Croisières - Goulette Village</strong><br />
@@ -344,8 +344,8 @@ export const TunisiaOfflineSuite: React.FC<TunisiaOfflineSuiteProps> = ({ onOpen
                 Procedura Rapida in caso di Qualsiasi Ritardo:
               </h4>
               <ol className="list-decimal list-inside space-y-1.5 text-slate-300 text-xs">
-                <li>Se alle 16:15 ti trovi ancora a Cartagine o Sidi Bou Saïd, apri l'app <strong>Bolt</strong> (funziona con dati mobili o chiedendo hotspot) e chiama una vettura direttamente per il Terminal Crociere (~10-15 minuti di tragitto).</li>
-                <li>Se non hai internet, sali al volo su un taxi giallo (taxi compteur) per strada e concorda 15-20 TND (~5-6€) per la corsa diretta al Cruise Terminal.</li>
+                <li><strong>Nota: Bolt non opera più in Tunisia.</strong> Se alle 16:15 sei ancora a Cartagine o Sidi Bou Saïd, ferma su strada un <strong>taxi giallo ufficiale</strong> (chiedendo il <em>compteur</em> o concordando 15–20 TND / ~5–6€ per l'intera auto) oppure usa l'app <strong>inDrive</strong> se hai dati mobili / hotspot (~10-15 min di tragitto).</li>
+                <li>In alternativa, da Sidi Bou Saïd o Carthage Salammbô prendi il <strong>treno TGM</strong> direzione Tunis Marine e scendi a <em>Goulette Vieille</em> (1.20 TND, 100% senza internet).</li>
                 <li>Conserva sempre nella tasca il "Daily Program" cartaceo di MSC Euribia consegnato in cabina la mattina: contiene il numero di emergenza dell'<strong>Agente Portuale Marittimo MSC</strong> locale di Tunisi.</li>
               </ol>
             </div>
