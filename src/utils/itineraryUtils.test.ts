@@ -5,8 +5,6 @@
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import fs from 'node:fs';
-import path from 'node:path';
 import { 
   calculateCompletedStats, 
   generateStopGoogleMapsUrl, 
@@ -15,7 +13,7 @@ import {
   generateSingleHtmlBundle
 } from './itineraryUtils';
 import { itineraryData } from '../data/itineraryData';
-import { STOP_IMAGES } from '../data/stopImages';
+import { loadStopPhoto, MSC_EURIBIA_PHOTO } from '../data/stopImages';
 import { TUNISIA_WIKI_ARTICLES, TUNISIA_PHRASEBOOK, TUNISIA_CURRENCY } from '../data/tunisiaWikiData';
 import { Stop } from '../types/itinerary';
 
@@ -172,18 +170,18 @@ test('Tunisia offline encyclopedia contains deep, accurate articles', () => {
   assert.ok(TUNISIA_CURRENCY.eurToTnd > 3.0);
 });
 
-test('Every itinerary stop across all 5 ports and variants has an existing local WebP photo', () => {
+test('Every itinerary stop across all 5 ports and variants resolves an embedded offline WebP photo', async () => {
+  assert.ok(MSC_EURIBIA_PHOTO.startsWith('data:image/webp;base64,'), 'MSC Euribia hero photo invalid');
+  assert.ok(MSC_EURIBIA_PHOTO.length > 4000, 'MSC Euribia hero photo too small');
+
   for (const port of itineraryData) {
     const allStops = port.varianti ? port.varianti.flatMap(v => v.tappe) : port.tappe;
     for (const stop of allStops) {
-      const photo = STOP_IMAGES[stop.id];
-      assert.ok(photo, `Missing photo mapping for stop ${stop.id} (${stop.nome})`);
-      assert.ok(photo.src.startsWith('./stops/') && photo.src.endsWith('.webp'), `Invalid relative path for ${stop.id}: ${photo.src}`);
+      const photo = await loadStopPhoto(stop.id);
+      assert.ok(photo, `Missing embedded photo for stop ${stop.id} (${stop.nome})`);
+      assert.ok(photo.src.startsWith('data:image/webp;base64,'), `Invalid data URI for ${stop.id}`);
+      assert.ok(photo.src.length > 3000, `Embedded photo suspiciously small for ${stop.id}`);
       assert.ok(photo.caption.length > 5, `Missing caption for ${stop.id}`);
-      const diskPath = path.resolve('public', photo.src.replace(/^\.\//, ''));
-      assert.ok(fs.existsSync(diskPath), `Missing WebP file on disk for ${stop.id}: ${diskPath}`);
-      const size = fs.statSync(diskPath).size;
-      assert.ok(size > 2048, `WebP file suspiciously small (${size} bytes) for ${stop.id}`);
     }
   }
 });

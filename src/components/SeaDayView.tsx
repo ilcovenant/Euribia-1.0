@@ -4,6 +4,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { MSC_EURIBIA_PHOTO } from '../data/stopImages';
 import {
   Ship,
   Waves,
@@ -127,7 +128,7 @@ export const SeaDayView: React.FC<SeaDayViewProps> = ({ onSelectPort }) => {
       <section className="rounded-2xl bg-slate-900 border border-slate-800 overflow-hidden shadow-lg">
         <div className="relative h-44 sm:h-48 bg-slate-950 overflow-hidden">
           <img
-            src="./stops/msc-euribia.webp"
+            src={MSC_EURIBIA_PHOTO}
             alt="MSC Euribia in navigazione nel Mediterraneo"
             className="w-full h-full object-cover opacity-80"
           />

@@ -5,7 +5,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Stop, CategoryType } from '../types/itinerary';
-import { STOP_IMAGES } from '../data/stopImages';
+import { getCachedStopPhoto, loadStopPhoto, STOP_CAPTIONS, StopPhoto } from '../data/stopImages';
 import { generateStopGoogleMapsUrl } from '../utils/itineraryUtils';
 import { 
   Check, 
@@ -44,12 +44,30 @@ export const StopCard: React.FC<StopCardProps> = ({
 }) => {
   const [isPhotoOpen, setIsPhotoOpen] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const [loadedPhoto, setLoadedPhoto] = useState<StopPhoto | null>(() => getCachedStopPhoto(stop.id));
   const isLast = index === totalStops - 1;
   const mapsUrl = generateStopGoogleMapsUrl(stop.query, stop.nome);
-  const mappedPhoto = STOP_IMAGES[stop.id];
-  const photoSrc = stop.immagine || mappedPhoto?.src;
-  const photoCaption = stop.immagineDidascalia || mappedPhoto?.caption;
+  const photoSrc = stop.immagine || loadedPhoto?.src;
+  const photoCaption = stop.immagineDidascalia || loadedPhoto?.caption || STOP_CAPTIONS[stop.id];
   const hasPhoto = Boolean(photoSrc && !imgError);
+
+  useEffect(() => {
+    setImgError(false);
+    const cached = getCachedStopPhoto(stop.id);
+    if (cached) {
+      setLoadedPhoto(cached);
+      return;
+    }
+    let cancelled = false;
+    loadStopPhoto(stop.id).then((photo) => {
+      if (!cancelled) {
+        setLoadedPhoto(photo);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [stop.id]);
 
   useEffect(() => {
     if (!isPhotoOpen) return;
