@@ -5,6 +5,8 @@
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
 import { 
   calculateCompletedStats, 
   generateStopGoogleMapsUrl, 
@@ -13,6 +15,7 @@ import {
   generateSingleHtmlBundle
 } from './itineraryUtils';
 import { itineraryData } from '../data/itineraryData';
+import { STOP_IMAGES } from '../data/stopImages';
 import { TUNISIA_WIKI_ARTICLES, TUNISIA_PHRASEBOOK, TUNISIA_CURRENCY } from '../data/tunisiaWikiData';
 import { Stop } from '../types/itinerary';
 
@@ -118,7 +121,7 @@ test('generateSingleHtmlBundle produces valid HTML and script compiles with zero
   }, 'The generated script has a syntax error!');
 });
 
-test('Barcellona includes both Classic (7.7 km) and Sagrada Família (7.2 km) variants with accurate WhatsApp text', () => {
+test('Barcellona includes both Classic (7.7 km) and Sagrada Família (7.8 km) variants with accurate WhatsApp text', () => {
   const barcellona = itineraryData.find(p => p.id === 'barcellona');
   assert.ok(barcellona, 'Barcellona port not found');
   assert.ok(barcellona.varianti && barcellona.varianti.length === 2, 'Barcellona should have 2 variants');
@@ -129,8 +132,13 @@ test('Barcellona includes both Classic (7.7 km) and Sagrada Família (7.2 km) va
   assert.ok(sagrada, 'Sagrada Família variant missing');
 
   assert.equal(classic.kmTotaliStimati, 7.7);
-  assert.equal(sagrada.kmTotaliStimati, 7.2);
+  assert.equal(sagrada.kmTotaliStimati, 7.8);
   assert.equal(sagrada.tappe.length, 9);
+
+  const stop7 = sagrada.tappe[6];
+  assert.equal(stop7.nome, 'Sagrada Família (Esterno) & Avinguda de Gaudí');
+  assert.equal(stop7.kmParziali, 2.2);
+  assert.equal(stop7.orario, '14:15 - 15:40');
 
   const resolvedSagrada = {
     ...barcellona,
@@ -141,8 +149,10 @@ test('Barcellona includes both Classic (7.7 km) and Sagrada Família (7.2 km) va
   };
 
   const shareText = formatItineraryForSharing(resolvedSagrada);
-  assert.ok(shareText.includes('~7.2 km a piedi'));
-  assert.ok(shareText.includes('Sagrada Família'));
+  assert.ok(shareText.includes('~7.8 km a piedi'));
+  assert.ok(shareText.includes('Sagrada Família (Esterno) & Avinguda de Gaudí (+2.2 km)'));
+  assert.ok(shareText.includes('Recinte Modernista de Sant Pau'));
+  assert.ok(shareText.includes('Stormtrooper'));
   assert.ok(shareText.includes('T-Familiar'));
   assert.ok(shareText.includes('⛪'));
   assert.ok(shareText.includes('Tutti a bordo: 17:15'));
@@ -160,6 +170,22 @@ test('Tunisia offline encyclopedia contains deep, accurate articles', () => {
 
   assert.ok(TUNISIA_PHRASEBOOK.length >= 8);
   assert.ok(TUNISIA_CURRENCY.eurToTnd > 3.0);
+});
+
+test('Every itinerary stop across all 5 ports and variants has an existing local WebP photo', () => {
+  for (const port of itineraryData) {
+    const allStops = port.varianti ? port.varianti.flatMap(v => v.tappe) : port.tappe;
+    for (const stop of allStops) {
+      const photo = STOP_IMAGES[stop.id];
+      assert.ok(photo, `Missing photo mapping for stop ${stop.id} (${stop.nome})`);
+      assert.ok(photo.src.startsWith('./stops/') && photo.src.endsWith('.webp'), `Invalid relative path for ${stop.id}: ${photo.src}`);
+      assert.ok(photo.caption.length > 5, `Missing caption for ${stop.id}`);
+      const diskPath = path.resolve('public', photo.src.replace(/^\.\//, ''));
+      assert.ok(fs.existsSync(diskPath), `Missing WebP file on disk for ${stop.id}: ${diskPath}`);
+      const size = fs.statSync(diskPath).size;
+      assert.ok(size > 2048, `WebP file suspiciously small (${size} bytes) for ${stop.id}`);
+    }
+  }
 });
 
 

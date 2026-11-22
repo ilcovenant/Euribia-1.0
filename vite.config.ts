@@ -54,7 +54,7 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+          globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff,woff2}'],
           globIgnores: ['**/assets/aistudio/**', '**/msc-euribia-itinerari-offline.html'],
           cleanupOutdatedCaches: true,
           clientsClaim: true,

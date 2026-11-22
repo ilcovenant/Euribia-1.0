@@ -16,6 +16,7 @@ import { TunisiaOfflineSuite } from './components/TunisiaOfflineSuite';
 import { OfflineWikiModal } from './components/OfflineWikiModal';
 import { OfflineIndicator } from './components/OfflineIndicator';
 import { CountdownView } from './components/CountdownView';
+import { SeaDayView } from './components/SeaDayView';
 import { useAllAboardCountdown } from './hooks/useAllAboardCountdown';
 import { formatDurationHms } from './data/countdownData';
 import { PortItinerary } from './types/itinerary';
@@ -34,7 +35,7 @@ export default function App() {
   const [activeViewId, setActiveViewId] = useState<string>(() => {
     if (typeof window !== 'undefined' && window.location.hash) {
       const hashId = window.location.hash.replace('#', '');
-      if (hashId === 'countdown' || itineraryData.some(p => p.id === hashId)) {
+      if (hashId === 'countdown' || hashId === 'navigazione' || itineraryData.some(p => p.id === hashId)) {
         return hashId;
       }
     }
@@ -103,6 +104,14 @@ export default function App() {
     }
   };
 
+  const handleSelectSeaDay = () => {
+    setActiveViewId('navigazione');
+    if (typeof window !== 'undefined') {
+      window.location.hash = 'navigazione';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   const handleSelectCountdown = () => {
     // Prima della partenza lascia Genova Imbarco; durante la crociera pre-seleziona l'ultimo porto aperto se non c'è uno scalo oggi
     if (!countdown.simulation && !countdown.todayPort && !countdown.isBeforeCruise) {
@@ -154,7 +163,10 @@ export default function App() {
 
   const resolvedPorts = itineraryData.map(resolvePort);
   const isCountdownView = activeViewId === 'countdown';
-  const currentPortIndex = resolvedPorts.findIndex(p => p.id === (isCountdownView ? lastPortId : activeViewId));
+  const isSeaDayView = activeViewId === 'navigazione';
+  const currentPortIndex = resolvedPorts.findIndex(
+    p => p.id === (isCountdownView || isSeaDayView ? lastPortId : activeViewId)
+  );
   const activePort = resolvedPorts[currentPortIndex] || resolvedPorts[0];
   const activeVariantId = activePort.varianti && activePort.varianti.length > 0
     ? (activePort.varianti.find(v => v.id === selectedVariants[activePort.id])?.id || activePort.varianti[0].id)
@@ -174,6 +186,7 @@ export default function App() {
   // Banner live compatto mostrato nello scalo attivo se oggi è il suo giorno (o in modalità prova)
   const matchingLiveBanner =
     !isCountdownView &&
+    !isSeaDayView &&
     countdown.activeLiveCountdown &&
     countdown.activeLiveCountdown.port.portId === activePort.id
       ? countdown.activeLiveCountdown
@@ -183,16 +196,17 @@ export default function App() {
     <div className="min-h-screen overflow-x-clip bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-slate-950">
       {/* Header Mobile First */}
       <Header
-        currentPortName={isCountdownView ? 'Tutti a Bordo' : activePort.citta}
+        currentPortName={isCountdownView ? 'Tutti a Bordo' : isSeaDayView ? 'Navigazione' : activePort.citta}
         onOpenCruiseInfo={() => setIsCruiseModalOpen(true)}
         onDownloadOfflineBundle={() => setIsOfflineModalOpen(true)}
       />
 
-      {/* Barra Tabs Orizzontale (A Bordo + 5 Porti) */}
+      {/* Barra Tabs Orizzontale (A Bordo + G2..G7 inclusa G5 Navigazione) */}
       <PortTabs
         ports={resolvedPorts}
         activeViewId={activeViewId}
         onSelectPort={handleSelectPort}
+        onSelectSeaDay={handleSelectSeaDay}
         onSelectCountdown={handleSelectCountdown}
         checkedStopsByPort={checkedStopsByPort}
         activeLiveCountdown={countdown.activeLiveCountdown}
@@ -235,6 +249,8 @@ export default function App() {
             onDismissAlertBanner={countdown.dismissAlertBanner}
             onOpenPortItinerary={handleSelectPort}
           />
+        ) : isSeaDayView ? (
+          <SeaDayView onSelectPort={handleSelectPort} />
         ) : (
           <>
             {/* Banner live compatto se lo scalo visualizzato è quello attivo oggi o in prova */}
@@ -377,12 +393,23 @@ export default function App() {
               </div>
             </section>
 
-            {/* Navigazione Veloce tra Porti Precedente / Successivo */}
+            {/* Navigazione Veloce tra Giorni Precedente / Successivo (incluso G5 Navigazione tra G4 e G6) */}
             <nav 
               aria-label="Navigazione tra scali successivi" 
               className="pt-4 pb-8 grid grid-cols-2 gap-2.5 w-full no-print"
             >
-              {prevPort ? (
+              {activePort.giornoNumero === 6 ? (
+                <button
+                  onClick={handleSelectSeaDay}
+                  className="w-full min-w-0 overflow-hidden p-2.5 sm:p-3 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-left transition active:scale-95 flex items-center gap-2"
+                >
+                  <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400 shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <div className="text-[10px] text-slate-400 font-mono truncate">Giorno 5</div>
+                    <div className="text-xs font-bold text-white truncate">🌊 Navigazione</div>
+                  </div>
+                </button>
+              ) : prevPort ? (
                 <button
                   onClick={() => handleSelectPort(prevPort.id)}
                   className="w-full min-w-0 overflow-hidden p-2.5 sm:p-3 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-left transition active:scale-95 flex items-center gap-2"
@@ -399,7 +426,18 @@ export default function App() {
                 <div />
               )}
 
-              {nextPort ? (
+              {activePort.giornoNumero === 4 ? (
+                <button
+                  onClick={handleSelectSeaDay}
+                  className="w-full min-w-0 overflow-hidden p-2.5 sm:p-3 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-right transition active:scale-95 flex items-center justify-end gap-2"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="text-[10px] text-slate-400 font-mono truncate">Giorno 5</div>
+                    <div className="text-xs font-bold text-white truncate">Navigazione 🌊</div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400 shrink-0" />
+                </button>
+              ) : nextPort ? (
                 <button
                   onClick={() => handleSelectPort(nextPort.id)}
                   className="w-full min-w-0 overflow-hidden p-2.5 sm:p-3 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-right transition active:scale-95 flex items-center justify-end gap-2"

@@ -25,6 +25,8 @@ export interface Stop {
   query: string; // Stringa di ricerca per Google Maps
   curiositaNerd?: string; // Curiosità pop culture / nerd / aneddoto storico insolito
   wikiSlug?: string; // Slug per consultare la voce enciclopedica offline (Wikipedia tascabile)
+  immagine?: string; // Percorso relativo alla foto reale locale (es. ./stops/napoli-maschio-angioino.webp)
+  immagineDidascalia?: string; // Breve didascalia descrittiva del luogo nella foto
 }
 
 export interface WikiSection {

@@ -12,6 +12,7 @@ interface PortTabsProps {
   ports: PortItinerary[];
   activeViewId: string;
   onSelectPort: (portId: string) => void;
+  onSelectSeaDay: () => void;
   onSelectCountdown: () => void;
   checkedStopsByPort: Record<string, string[]>;
   activeLiveCountdown: ComputedCountdown | null;
@@ -23,6 +24,7 @@ export const PortTabs: React.FC<PortTabsProps> = ({
   ports,
   activeViewId,
   onSelectPort,
+  onSelectSeaDay,
   onSelectCountdown,
   checkedStopsByPort,
   activeLiveCountdown,
@@ -30,6 +32,7 @@ export const PortTabs: React.FC<PortTabsProps> = ({
   preCruiseRemainingMs
 }) => {
   const isCountdownActive = activeViewId === 'countdown';
+  const isSeaDayActive = activeViewId === 'navigazione';
 
   const getCountdownTabStyle = () => {
     if (isCountdownActive) {
@@ -94,7 +97,7 @@ export const PortTabs: React.FC<PortTabsProps> = ({
           </div>
         </button>
 
-        {/* Tabs dei 5 Porti */}
+        {/* Tabs dei 5 Porti + Giorno 5 Navigazione in ordine cronologico (G2 → G7) */}
         {ports.map((port) => {
           const isActive = port.id === activeViewId;
           const checked = checkedStopsByPort[port.id] || [];
@@ -102,38 +105,61 @@ export const PortTabs: React.FC<PortTabsProps> = ({
           const isAllCompleted = totalStops > 0 && checked.length === totalStops;
 
           return (
-            <button
-              key={port.id}
-              type="button"
-              onClick={() => onSelectPort(port.id)}
-              aria-selected={isActive}
-              role="tab"
-              className={`shrink-0 min-h-[44px] flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all select-none whitespace-nowrap ${
-                isActive
-                  ? 'bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-500/20'
-                  : 'bg-slate-900/90 text-slate-300 border border-slate-800 hover:bg-slate-800/90 hover:text-white'
-              }`}
-            >
-              <span className="text-base leading-none">{port.bandiera}</span>
-              <div className="text-left flex flex-col">
-                <span className="leading-tight">
-                  {port.citta.split('/')[0].trim()}
-                </span>
-                <span className={`text-[10px] font-mono tabular-nums leading-none mt-0.5 ${isActive ? 'text-slate-900 font-bold' : 'text-slate-400'}`}>
-                  G{port.giornoNumero} · {port.kmTotaliStimati}km
-                </span>
-              </div>
-              {isAllCompleted && (
-                <span 
-                  title="Tutte le tappe completate!"
-                  className={`w-4 h-4 rounded-full flex items-center justify-center ${
-                    isActive ? 'bg-slate-950 text-cyan-400' : 'bg-emerald-500 text-slate-950'
+            <React.Fragment key={port.id}>
+              <button
+                type="button"
+                onClick={() => onSelectPort(port.id)}
+                aria-selected={isActive}
+                role="tab"
+                className={`shrink-0 min-h-[44px] flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all select-none whitespace-nowrap ${
+                  isActive
+                    ? 'bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-500/20'
+                    : 'bg-slate-900/90 text-slate-300 border border-slate-800 hover:bg-slate-800/90 hover:text-white'
+                }`}
+              >
+                <span className="text-base leading-none">{port.bandiera}</span>
+                <div className="text-left flex flex-col">
+                  <span className="leading-tight">
+                    {port.citta.split('/')[0].trim()}
+                  </span>
+                  <span className={`text-[10px] font-mono tabular-nums leading-none mt-0.5 ${isActive ? 'text-slate-900 font-bold' : 'text-slate-400'}`}>
+                    G{port.giornoNumero} · {port.kmTotaliStimati}km
+                  </span>
+                </div>
+                {isAllCompleted && (
+                  <span 
+                    title="Tutte le tappe completate!"
+                    className={`w-4 h-4 rounded-full flex items-center justify-center ${
+                      isActive ? 'bg-slate-950 text-cyan-400' : 'bg-emerald-500 text-slate-950'
+                    }`}
+                  >
+                    <Check className="w-2.5 h-2.5 stroke-[3]" />
+                  </span>
+                )}
+              </button>
+
+              {port.giornoNumero === 4 && (
+                <button
+                  type="button"
+                  onClick={onSelectSeaDay}
+                  aria-selected={isSeaDayActive}
+                  role="tab"
+                  className={`shrink-0 min-h-[44px] flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all select-none whitespace-nowrap ${
+                    isSeaDayActive
+                      ? 'bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-500/20'
+                      : 'bg-slate-900/90 text-slate-300 border border-slate-800 hover:bg-slate-800/90 hover:text-white'
                   }`}
                 >
-                  <Check className="w-2.5 h-2.5 stroke-[3]" />
-                </span>
+                  <span className="text-base leading-none">🌊</span>
+                  <div className="text-left flex flex-col">
+                    <span className="leading-tight">Navigazione</span>
+                    <span className={`text-[10px] font-mono tabular-nums leading-none mt-0.5 ${isSeaDayActive ? 'text-slate-900 font-bold' : 'text-slate-400'}`}>
+                      G5 · In mare
+                    </span>
+                  </div>
+                </button>
               )}
-            </button>
+            </React.Fragment>
           );
         })}
       </div>

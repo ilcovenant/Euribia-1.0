@@ -691,17 +691,17 @@ export const itineraryData: PortItinerary[] = [
       {
         id: 'barcellona-sagrada',
         label: 'Con Sagrada Família',
-        badge: 'Sagrada + Metro L2 • 7.2 km',
+        badge: 'Sagrada + Metro L2 • 7.8 km',
         portoTitolo: 'Barcellona (Centro, Triángulo Friki & Sagrada Família)',
-        kmTotaliStimati: 7.2,
+        kmTotaliStimati: 7.8,
         infoLogisticaMolo: {
           nomeMolo: 'Moll Adossat (Terminal Creuers Barcelona)',
           collegamentoPortoCitta: 'Cruise Bus T3 (4.50€ A/R) + Metro L2 diretta Sagrada Família → Paral·lel (~3.12€/testa)',
           mezzoConsigliato: 'Cruise Bus T3 fino a Colom + rientro in Metro L2 (Viola) diretta senza cambi da Sagrada Família a Paral·lel',
           costoTransfer: '~7.60 € a persona totali (4.50€ Bus T3 A/R + ~3.12€ quota T-Familiar condivisa)',
           tempoTransferMinuti: 12,
-          istruzioniDettagliate: 'Variante ottimizzata per includere la Sagrada Família senza rinunciare a Boqueria, Granja Viader, Barrio Gótico, Ciutadella e Triángulo Friki! All\'andata Cruise Bus T3 fino al Monument a Colom. Dal Triángulo Friki si prosegue dritti a nord lungo il viale alberato Passeig de Sant Joan fino alla Sagrada Família. Alle 15:40 rientro super rapido in Metro Linea L2 (Viola) diretta da Sagrada Família a Paral·lel (9-11 min, zero cambi), 700m pianeggianti fino a Colom e Bus T3 per la nave entro le 16:45 (Tutti a bordo 17:15).',
-          consiglioRisparmio: 'Alle macchinette TMB della metro Sagrada Família prendete 1 sola tessera condivisa T-Familiar da 8 corse (11.50€ + 1€ tessera ricaricabile = ~3.12€ a testa, valida multi-persona con 4 timbrature consecutive, e vi restano pure 4 corse extra di riserva!). In alternativa, 4 biglietti singoli costano ~2.65€ ciascuno. Per entrare dentro la Sagrada Família prenotate lo slot delle 14:45 su sagradafamilia.org con anticipo.'
+          istruzioniDettagliate: 'Variante ottimizzata per includere la Sagrada Família senza rinunciare a Boqueria, Granja Viader, Barrio Gótico, Ciutadella e Triángulo Friki! All\'andata Cruise Bus T3 fino al Monument a Colom. Dal Triángulo Friki si prosegue dritti a nord lungo il viale alberato Passeig de Sant Joan fino alla Sagrada Família, con deviazione lungo Avinguda de Gaudí fino a Sant Pau. Alle 15:40 rientro super rapido in Metro Linea L2 (Viola) diretta da Sagrada Família a Paral·lel (9-11 min, zero cambi), 700m pianeggianti fino a Colom e Bus T3 per la nave entro le 16:45 (Tutti a bordo 17:15).',
+          consiglioRisparmio: 'Alle macchinette TMB della metro Sagrada Família prendete 1 sola tessera condivisa T-Familiar da 8 corse (11.50€ + 1€ tessera ricaricabile = ~3.12€ a testa, valida multi-persona con 4 timbrature consecutive, e vi restano pure 4 corse extra di riserva!). In alternativa, 4 biglietti singoli costano ~2.65€ ciascuno. La visita esterna della Sagrada Família e la passeggiata su Avinguda de Gaudí fino a Sant Pau sono 100% gratuite.'
         },
         tappe: [
           {
@@ -773,13 +773,13 @@ export const itineraryData: PortItinerary[] = [
           {
             id: 'bcsf-6',
             orario: '14:15 - 15:40',
-            nome: 'Sagrada Família: Passeggiata Passeig de Sant Joan & Capolavoro di Gaudí',
-            descrizione: 'Risalita di 1.6 km (~20 min pianeggianti) lungo il viale alberato di Passeig de Sant Joan fino ai piedi della Sagrada Família. Doppia opzione perfetta per il gruppo: visita esterna gratuita e spettacolare delle facciate della Natività (con riflesso nello stagno di Plaça de Gaudí) e della Passione dai giardini circostanti, oppure ingresso interno da prenotare in anticipo online per lo slot delle 14:45 (uscita prevista alle 15:40).',
+            nome: 'Sagrada Família (Esterno) & Avinguda de Gaudí',
+            descrizione: 'Passeggiata lungo Passeig de Sant Joan fino alla Sagrada Família. Visita esterna gratuita delle due facciate principali (Natività e Passione) con sosta fotografica allo stagno di Plaça de Gaudí. Col tempo guadagnato non entrando nella basilica, breve deviazione lungo il viale pedonale Avinguda de Gaudí fino all\'ingresso monumentale del Recinte Modernista de Sant Pau (complesso Art Nouveau simile a una cittadella fantasy), prima di tornare alla stazione metro Sagrada Família (Linea L2).',
             tipologia: 'Architettura/Cult',
-            kmParziali: 1.6,
+            kmParziali: 2.2,
             durataMinuti: 85,
             query: 'Basilica de la Sagrada Familia Barcelona',
-            curiositaNerd: 'I lavori sono iniziati nel 1882: il 2026 è l\'anno storico del centenario della morte di Antoni Gaudí, con la maestosa Torre di Gesù Cristo alta 172,5 metri che la rende la chiesa più alta del mondo! Per foto gratis perfette andate sul lato est (laghetto di Plaça de Gaudí).'
+            curiositaNerd: 'La Facciata della Passione (scolpita da Josep Maria Subirachs) ha uno stile spigoloso e geometrico che ha ispirato artisti sci-fi, incluso il design degli Stormtrooper di Star Wars secondo diverse leggende di settore.'
           },
           {
             id: 'bcsf-7',
@@ -801,7 +801,7 @@ export const itineraryData: PortItinerary[] = [
             kmParziali: 0.0,
             durataMinuti: 45,
             query: 'Moll Adossat Terminal Creuers Barcelona',
-            curiositaNerd: 'Con soli 7.2 km reali a piedi (grazie alla Metro L2 al rientro) avete unito il centro medievale, il Triángulo Friki e la Sagrada Família rientrando in nave senza stress!'
+            curiositaNerd: 'Con ~7.8 km reali a piedi (grazie alla Metro L2 al rientro) avete unito il centro medievale, il Triángulo Friki, la Sagrada Família e Avinguda de Gaudí rientrando in nave senza stress!'
           }
         ]
       }

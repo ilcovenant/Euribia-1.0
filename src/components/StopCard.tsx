@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Stop, CategoryType } from '../types/itinerary';
+import { STOP_IMAGES } from '../data/stopImages';
 import { generateStopGoogleMapsUrl } from '../utils/itineraryUtils';
 import { 
   Check, 
@@ -19,7 +20,9 @@ import {
   Utensils,
   Navigation,
   Compass,
-  BookOpen
+  BookOpen,
+  X,
+  ZoomIn
 } from 'lucide-react';
 
 interface StopCardProps {
@@ -39,8 +42,23 @@ export const StopCard: React.FC<StopCardProps> = ({
   onToggleCheck,
   onOpenWiki
 }) => {
+  const [isPhotoOpen, setIsPhotoOpen] = useState(false);
+  const [imgError, setImgError] = useState(false);
   const isLast = index === totalStops - 1;
   const mapsUrl = generateStopGoogleMapsUrl(stop.query, stop.nome);
+  const mappedPhoto = STOP_IMAGES[stop.id];
+  const photoSrc = stop.immagine || mappedPhoto?.src;
+  const photoCaption = stop.immagineDidascalia || mappedPhoto?.caption;
+  const hasPhoto = Boolean(photoSrc && !imgError);
+
+  useEffect(() => {
+    if (!isPhotoOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsPhotoOpen(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isPhotoOpen]);
 
   // Badge styles based on category
   const categoryConfig: Record<CategoryType, { colorClass: string; icon: React.ReactNode }> = {
@@ -136,12 +154,42 @@ export const StopCard: React.FC<StopCardProps> = ({
           </div>
         </div>
 
-        {/* Nome della Tappa */}
-        <h3 className={`font-extrabold text-base sm:text-lg transition-colors ${
-          isChecked ? 'line-through text-slate-400' : 'text-white'
-        }`}>
-          {stop.nome}
-        </h3>
+        {/* Nome della Tappa + Miniatura Foto Cliccabile */}
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <h3 className={`font-extrabold text-base sm:text-lg leading-snug transition-colors ${
+              isChecked ? 'line-through text-slate-400' : 'text-white'
+            }`}>
+              {stop.nome}
+            </h3>
+          </div>
+
+          {hasPhoto && (
+            <button
+              type="button"
+              onClick={() => setIsPhotoOpen(true)}
+              aria-label={`Ingrandisci foto di ${stop.nome}`}
+              className="relative shrink-0 w-20 h-20 sm:w-24 sm:h-20 rounded-xl overflow-hidden border border-slate-700/80 hover:border-cyan-400/80 bg-slate-950 group/thumb transition active:scale-95 focus:outline-none focus:ring-2 focus:ring-cyan-500 no-print"
+            >
+              <img
+                src={photoSrc}
+                alt={photoCaption || stop.nome}
+                loading="lazy"
+                decoding="async"
+                onError={() => setImgError(true)}
+                className={`w-full h-full object-cover transition-transform duration-300 group-hover/thumb:scale-105 ${
+                  isChecked ? 'opacity-65' : 'opacity-100'
+                }`}
+              />
+              <span
+                aria-hidden="true"
+                className="absolute bottom-1 right-1 w-5 h-5 rounded-md bg-slate-950/80 border border-slate-700/80 text-cyan-300 flex items-center justify-center"
+              >
+                <ZoomIn className="w-3 h-3" />
+              </span>
+            </button>
+          )}
+        </div>
 
         {/* Descrizione (ingrandita per facilitare la lettura all'aperto) */}
         <p className={`text-sm sm:text-[14.5px] mt-2 leading-relaxed ${
@@ -204,6 +252,62 @@ export const StopCard: React.FC<StopCardProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Lightbox Schermo Intero Foto Tappa */}
+      {isPhotoOpen && hasPhoto && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Foto: ${stop.nome}`}
+          onClick={() => setIsPhotoOpen(false)}
+          className="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4 no-print"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-lg rounded-2xl bg-slate-900 border border-slate-700 overflow-hidden shadow-2xl"
+          >
+            <div className="relative bg-slate-950 flex items-center justify-center max-h-[70vh] overflow-hidden">
+              <img
+                src={photoSrc}
+                alt={photoCaption || stop.nome}
+                className="w-full max-h-[70vh] object-contain"
+              />
+              <button
+                type="button"
+                onClick={() => setIsPhotoOpen(false)}
+                aria-label="Chiudi foto"
+                className="absolute top-2.5 right-2.5 min-w-[40px] min-h-[40px] rounded-xl bg-slate-950/85 hover:bg-slate-900 border border-slate-700 text-white flex items-center justify-center transition active:scale-95"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-4 flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="text-[11px] font-mono text-cyan-400 mb-0.5">
+                  Tappa {index + 1} · {stop.orario}
+                </div>
+                <h4 className="text-sm sm:text-base font-bold text-white leading-snug">
+                  {stop.nome}
+                </h4>
+                {photoCaption && (
+                  <p className="text-xs text-slate-400 mt-1">
+                    {photoCaption}
+                  </p>
+                )}
+              </div>
+              <a
+                href={mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="shrink-0 min-h-[40px] px-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-extrabold flex items-center gap-1.5 transition active:scale-95"
+              >
+                <MapPin className="w-3.5 h-3.5" />
+                <span>Maps</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
