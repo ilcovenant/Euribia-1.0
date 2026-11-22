@@ -10,6 +10,7 @@ import {
   TUNISIA_CURRENCY, 
   StreetPhrase 
 } from '../data/tunisiaWikiData';
+import { getConverterEasterEgg } from '../utils/easterEggs';
 import { 
   BookOpen, 
   Coins, 
@@ -67,6 +68,7 @@ export const TunisiaOfflineSuite: React.FC<TunisiaOfflineSuiteProps> = ({ onOpen
     : TUNISIA_PHRASEBOOK.filter(p => p.contesto === selectedPhraseCategory);
 
   const wikiArticlesList = Object.values(TUNISIA_WIKI_ARTICLES);
+  const converterSecretNote = getConverterEasterEgg(eurInput, tndInput);
 
   return (
     <div className="rounded-3xl border border-cyan-800/60 bg-gradient-to-b from-slate-900 via-slate-950 to-slate-900 shadow-xl overflow-hidden text-slate-100">
@@ -232,6 +234,12 @@ export const TunisiaOfflineSuite: React.FC<TunisiaOfflineSuiteProps> = ({ onOpen
                 </div>
               </div>
             </div>
+
+            {converterSecretNote && (
+              <div className="px-3.5 py-2.5 rounded-xl bg-cyan-950/50 border border-cyan-500/40 text-xs text-cyan-200 leading-relaxed">
+                {converterSecretNote}
+              </div>
+            )}
 
             {/* Prezzi tipici da strada cliccabili (Preset veloci) */}
             <div>

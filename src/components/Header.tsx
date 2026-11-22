@@ -18,13 +18,15 @@ interface HeaderProps {
   currentPortName: string;
   nextEvent: NextCruiseEvent | null;
   onClickNextEvent: () => void;
+  onLogoTap?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   onOpenCruiseInfo,
   onDownloadOfflineBundle,
   nextEvent,
-  onClickNextEvent
+  onClickNextEvent,
+  onLogoTap
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -89,11 +91,16 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header className="relative z-30 bg-slate-950/95 backdrop-blur-md border-b border-slate-800/80 px-2.5 sm:px-4 py-2 select-none no-print">
       <div className="max-w-xl mx-auto flex items-center justify-between gap-2">
-        {/* Logo & Titolo compatto su mobile */}
+        {/* Logo & Titolo compatto su mobile (5 tocchi sull'icona = Sirena Comandante) */}
         <div className="flex items-center gap-2 shrink-0">
-          <div className="w-8 h-8 sm:w-9 sm:h-9 shrink-0 rounded-xl bg-gradient-to-tr from-cyan-600 to-blue-500 flex items-center justify-center text-slate-950 shadow-md shadow-cyan-900/30 font-bold">
+          <button
+            type="button"
+            onClick={onLogoTap}
+            aria-label="MSC Euribia"
+            className="w-8 h-8 sm:w-9 sm:h-9 shrink-0 rounded-xl bg-gradient-to-tr from-cyan-600 to-blue-500 flex items-center justify-center text-slate-950 shadow-md shadow-cyan-900/30 font-bold transition active:scale-90 cursor-pointer"
+          >
             <Ship className="w-4 h-4 sm:w-5 sm:h-5 text-slate-950 stroke-[2.2]" />
-          </div>
+          </button>
           <div className="min-w-0">
             <h1 className="font-extrabold text-xs sm:text-sm text-white tracking-tight leading-tight whitespace-nowrap">
               MSC Euribia

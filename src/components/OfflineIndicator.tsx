@@ -43,7 +43,7 @@ export const OfflineIndicator: React.FC = () => {
       >
         <div className="flex items-center gap-2 min-w-0">
           <WifiOff className="w-4 h-4 text-amber-400 shrink-0" />
-          <span>Modalità Offline attiva — Itinerari, Wiki e strumenti locali pronti.</span>
+          <span>Modalità Lupo di Mare · 0€ al roaming satellitare (tutto pronto offline).</span>
         </div>
         <button
           type="button"
