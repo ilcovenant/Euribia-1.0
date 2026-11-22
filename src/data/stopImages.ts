@@ -66,19 +66,17 @@ export const STOP_CAPTIONS: Record<string, string> = {
   'bcsf-8': 'Terminal Crociere Moll Adossat – Porto di Barcellona',
 
   // === 5. MARSIGLIA ===
-  'mr-0': 'Porto di Marsiglia – Terminal Crociere Môle Léon Gourret',
-  'mr-1': 'Vieux-Port di Marsiglia con il celebre padiglione a specchio L’Ombrière',
-  'mr-2': 'Basilica di Notre-Dame de la Garde (La Bonne Mère) sulla collina',
-  'mr-3': 'Abbazia fortificata di Saint-Victor, accanto a Le Four des Navettes',
-  'mr-4': 'Il piccolo Ferry-Boat elettrico che attraversa il Vieux-Port',
-  'mr-5': 'Vicoli colorati e street art nel quartiere storico di Le Panier',
-  'mr-6': 'Il MUCEM e la sua spettacolare facciata merlettata in cemento sul mare',
-  'mr-7': 'Cathédrale de la Major e zona La Joliette per il rientro in navetta',
-  'mr-8': 'MSC Euribia – Ultimo rientro a bordo prima della rotta per Genova'
+  'mr-0': 'Porto di Marsiglia – Terminal Crociere Môle Léon Gourret (Linea Verde)',
+  'mr-1': 'Cattedrale de La Major e vicoli colorati del quartiere storico Le Panier',
+  'mr-2': 'Vieux-Port di Marsiglia con il padiglione a specchio L’Ombrière di Norman Foster',
+  'mr-3': 'Basilica di Notre-Dame de la Garde (La Bonne Mère) con vista su Marsiglia e Isola d’If',
+  'mr-4': 'Abbazia fortificata di Saint-Victor, a due passi dallo storico Four des Navettes',
+  'mr-5': 'Bastioni e passerelle sospese sul mare di Fort Saint-Jean e MUCEM',
+  'mr-6': 'MSC Euribia – Rientro al Terminal Croisières prima delle 17:15'
 };
 
 /**
- * Alias per evitare di duplicare i data-URI tra Barcellona Classico e Barcellona Sagrada.
+ * Alias per riutilizzare i data-URI incorporati senza duplicarli (Barcellona Sagrada + nuovo ordine Marsiglia).
  */
 const STOP_PHOTO_KEY_ALIAS: Record<string, string> = {
   'bcsf-0': 'bc-0',
@@ -87,7 +85,13 @@ const STOP_PHOTO_KEY_ALIAS: Record<string, string> = {
   'bcsf-3': 'bc-3',
   'bcsf-4': 'bc-4',
   'bcsf-5': 'bc-5',
-  'bcsf-8': 'bc-7'
+  'bcsf-8': 'bc-7',
+  'mr-1': 'mr-5',
+  'mr-2': 'mr-1',
+  'mr-3': 'mr-2',
+  'mr-4': 'mr-3',
+  'mr-5': 'mr-6',
+  'mr-6': 'mr-8'
 };
 
 type PortGroup = 'napoli' | 'palermo' | 'tunisia' | 'barcellona' | 'marsiglia';

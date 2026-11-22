@@ -149,7 +149,7 @@ export const TunisiaOfflineSuite: React.FC<TunisiaOfflineSuiteProps> = ({ onOpen
           <div className="space-y-3">
             <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
               <span>Tocca un articolo per aprirlo a schermo intero:</span>
-              <span className="font-mono text-cyan-400">8 Voci Storiche</span>
+              <span className="font-mono text-cyan-400">{wikiArticlesList.length} Voci Storiche</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -157,7 +157,7 @@ export const TunisiaOfflineSuite: React.FC<TunisiaOfflineSuiteProps> = ({ onOpen
                 <button
                   key={art.slug}
                   onClick={() => onOpenWiki(art.slug)}
-                  className="p-3 rounded-2xl bg-slate-900 hover:bg-slate-800/90 border border-slate-800 hover:border-cyan-500/60 text-left transition group active:scale-98 flex flex-col justify-between"
+                  className="p-3 rounded-2xl bg-slate-900 hover:bg-slate-800/90 border border-slate-800 hover:border-cyan-500/60 text-left transition group active:scale-[0.98] flex flex-col justify-between"
                 >
                   <div>
                     <div className="flex items-center justify-between gap-1 mb-1">
@@ -203,13 +203,14 @@ export const TunisiaOfflineSuite: React.FC<TunisiaOfflineSuiteProps> = ({ onOpen
                 <div className="relative">
                   <input
                     type="number"
+                    inputMode="decimal"
                     step="any"
                     value={eurInput}
                     onChange={(e) => handleEurChange(e.target.value)}
-                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-base font-mono font-bold text-white focus:outline-none focus:border-cyan-500"
+                    className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-3 pr-8 py-2 text-base font-mono font-bold text-white focus:outline-none focus:border-cyan-500"
                     placeholder="0.00"
                   />
-                  <span className="absolute right-3 top-2.5 text-xs text-slate-400 font-bold">€</span>
+                  <span className="absolute right-3 top-2.5 text-xs text-slate-400 font-bold pointer-events-none">€</span>
                 </div>
               </div>
 
@@ -220,13 +221,14 @@ export const TunisiaOfflineSuite: React.FC<TunisiaOfflineSuiteProps> = ({ onOpen
                 <div className="relative">
                   <input
                     type="number"
+                    inputMode="decimal"
                     step="any"
                     value={tndInput}
                     onChange={(e) => handleTndChange(e.target.value)}
-                    className="w-full bg-slate-900 border border-cyan-700/60 rounded-xl px-3 py-2 text-base font-mono font-bold text-cyan-300 focus:outline-none focus:border-cyan-400"
+                    className="w-full bg-slate-900 border border-cyan-700/60 rounded-xl pl-3 pr-10 py-2 text-base font-mono font-bold text-cyan-300 focus:outline-none focus:border-cyan-400"
                     placeholder="0.00"
                   />
-                  <span className="absolute right-3 top-2.5 text-xs text-cyan-400 font-bold">DT</span>
+                  <span className="absolute right-3 top-2.5 text-xs text-cyan-400 font-bold pointer-events-none">DT</span>
                 </div>
               </div>
             </div>
@@ -265,7 +267,7 @@ export const TunisiaOfflineSuite: React.FC<TunisiaOfflineSuiteProps> = ({ onOpen
         {activeTab === 'phrasebook' && (
           <div className="space-y-3">
             {/* Categorie filtri */}
-            <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none text-xs">
+            <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs">
               {phraseCategories.map((cat) => (
                 <button
                   key={cat}

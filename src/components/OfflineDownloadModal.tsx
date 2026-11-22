@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { itineraryData } from '../data/itineraryData';
 import { generateSingleHtmlBundle } from '../utils/itineraryUtils';
 import { 
@@ -29,6 +29,15 @@ export const OfflineDownloadModal: React.FC<OfflineDownloadModalProps> = ({
 }) => {
   const [downloaded, setDownloaded] = useState(false);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const handleDownload = () => {
@@ -52,9 +61,13 @@ export const OfflineDownloadModal: React.FC<OfflineDownloadModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="offline-modal-title"
+      onClick={onClose}
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200"
     >
-      <div className="relative w-full max-w-lg bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden text-slate-100 max-h-[90vh] flex flex-col">
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-lg bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden text-slate-100 max-h-[90vh] flex flex-col"
+      >
         {/* Header */}
         <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-800 bg-slate-950/70">
           <div className="flex items-center gap-2.5">
@@ -86,12 +99,12 @@ export const OfflineDownloadModal: React.FC<OfflineDownloadModalProps> = ({
               <span>Opzione 1: App Web Online (PWA per il gruppo)</span>
             </div>
             <p className="text-slate-300 text-xs leading-relaxed">
-              Puoi inviare il link di questa Web App a tutti i 4 amici del gruppo. Sullo smartphone (Chrome su Android o Safari su iPhone):
+              Puoi inviare il link di questa Web App a tutti i 4 amici del gruppo. Sullo smartphone (Chrome o Firefox su Android, Safari su iPhone):
             </p>
             <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-[11px] text-slate-300 space-y-1">
-              <div>👉 Tocca i <strong>tre puntini (⋮)</strong> in alto a destra su Chrome.</div>
+              <div>👉 Tocca i <strong>tre puntini (⋮)</strong> su Chrome/Firefox oppure <strong>Condividi</strong> su Safari.</div>
               <div>👉 Seleziona <strong className="text-cyan-300">"Aggiungi a schermata Home"</strong> o <strong className="text-cyan-300">"Installa app"</strong>.</div>
-              <div className="text-slate-400">In questo modo compare come una vera app sullo smartphone accessibile in qualsiasi momento.</div>
+              <div className="text-slate-400">In questo modo compare come una vera app sullo smartphone, funzionante al 100% offline.</div>
             </div>
           </div>
 
@@ -102,7 +115,7 @@ export const OfflineDownloadModal: React.FC<OfflineDownloadModalProps> = ({
               <span>Opzione 2: File Singolo Offline (.html)</span>
             </div>
             <p className="text-slate-300 text-xs leading-relaxed">
-              Questo file è <strong>100% indipendente</strong>: contiene tutte le 5 tappe, orari, logistica moli, mappa e foglio di stile incorporato (senza dipendere da internet). È il "salvagente" perfetto per quando si è in mare aperto o in Tunisia senza roaming europeo.
+              Questo file è <strong>100% indipendente</strong>: contiene tutti gli scali, le varianti di Barcellona, orari, logistica moli e Kit Tunisia incorporati (senza dipendere da internet). È il "salvagente" perfetto per quando si è in mare aperto o in Tunisia senza roaming europeo.
             </p>
 
             <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-[11px] text-slate-300 space-y-1">
@@ -142,7 +155,7 @@ export const OfflineDownloadModal: React.FC<OfflineDownloadModalProps> = ({
             </button>
 
             <a
-              href="/msc-euribia-itinerari-offline.html"
+              href="./msc-euribia-itinerari-offline.html"
               target="_blank"
               rel="noopener noreferrer"
               className="w-full py-2.5 px-4 rounded-xl font-bold text-xs bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 flex items-center justify-center gap-1.5 transition active:scale-95"

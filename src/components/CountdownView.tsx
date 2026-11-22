@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   PORT_RETURN_SCHEDULES,
   ComputedCountdown,
@@ -167,6 +167,18 @@ export const CountdownView: React.FC<CountdownViewProps> = ({
 }) => {
   const [isTaxiCardOpen, setIsTaxiCardOpen] = useState(false);
 
+  useEffect(() => {
+    if (!isTaxiCardOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsTaxiCardOpen(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isTaxiCardOpen]);
+
+  const isBoardingHighlight = selectedPortId === 'genova-imbarco' && boardingRemainingMs > 0;
+  const isDepartureHighlight = selectedPortId === 'genova-imbarco' && boardingRemainingMs <= 0;
+
   const {
     port,
     isSimulated,
@@ -217,7 +229,7 @@ export const CountdownView: React.FC<CountdownViewProps> = ({
           type="button"
           onClick={() => onSelectPortId('genova-imbarco')}
           className={`p-2.5 rounded-2xl border text-left transition active:scale-[0.98] ${
-            selectedPortId === 'genova-imbarco'
+            isBoardingHighlight
               ? 'bg-cyan-950/50 border-cyan-500/70'
               : 'bg-slate-900 border-slate-800 hover:border-slate-700'
           }`}
@@ -235,8 +247,8 @@ export const CountdownView: React.FC<CountdownViewProps> = ({
           type="button"
           onClick={() => onSelectPortId('genova-imbarco')}
           className={`p-2.5 rounded-2xl border text-left transition active:scale-[0.98] ${
-            selectedPortId === 'genova-imbarco'
-              ? 'bg-cyan-950/50 border-cyan-500/70'
+            isDepartureHighlight
+              ? 'bg-amber-950/45 border-amber-500/70'
               : 'bg-slate-900 border-slate-800 hover:border-slate-700'
           }`}
         >

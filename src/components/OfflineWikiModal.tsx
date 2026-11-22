@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { TUNISIA_WIKI_ARTICLES } from '../data/tunisiaWikiData';
 import { 
   X, 
@@ -29,6 +29,23 @@ export const OfflineWikiModal: React.FC<OfflineWikiModalProps> = ({
   onClose,
   onSelectArticle
 }) => {
+  const bodyRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (bodyRef.current) {
+      bodyRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [slug]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen || !slug) return null;
 
   const article = TUNISIA_WIKI_ARTICLES[slug] || TUNISIA_WIKI_ARTICLES['sidi-bou-said'];
@@ -79,7 +96,10 @@ export const OfflineWikiModal: React.FC<OfflineWikiModalProps> = ({
         </div>
 
         {/* Corpo dell'Articolo Enciclopedico */}
-        <div className="p-5 sm:p-6 overflow-y-auto space-y-6 text-slate-200 text-sm sm:text-[15px] leading-relaxed">
+        <div
+          ref={bodyRef}
+          className="p-5 sm:p-6 overflow-y-auto space-y-6 text-slate-200 text-sm sm:text-[15px] leading-relaxed"
+        >
           {/* Sottotitolo & Metadata */}
           <div>
             <p className="text-xs sm:text-sm font-semibold text-cyan-300/90 italic">
@@ -145,7 +165,7 @@ export const OfflineWikiModal: React.FC<OfflineWikiModalProps> = ({
                   <button
                     key={a.slug}
                     onClick={() => onSelectArticle(a.slug)}
-                    className="p-2.5 rounded-xl bg-slate-950/80 hover:bg-slate-800 border border-slate-800 hover:border-cyan-500/50 text-left transition text-xs flex items-center justify-between group active:scale-98"
+                    className="p-2.5 rounded-xl bg-slate-950/80 hover:bg-slate-800 border border-slate-800 hover:border-cyan-500/50 text-left transition text-xs flex items-center justify-between group active:scale-[0.98]"
                   >
                     <div className="truncate pr-2">
                       <div className="font-bold text-white group-hover:text-cyan-300 truncate">

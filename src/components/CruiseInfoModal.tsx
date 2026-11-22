@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { CRUISE_INFO } from '../data/itineraryData';
 import { 
   X, 
@@ -15,8 +15,7 @@ import {
   AlertTriangle, 
   Plane, 
   CreditCard, 
-  Sparkles, 
-  Maximize2 
+  Sparkles
 } from 'lucide-react';
 
 interface CruiseInfoModalProps {
@@ -36,7 +35,19 @@ export const CruiseInfoModal: React.FC<CruiseInfoModalProps> = ({
     'fuso': true        // aperta di default per mostrare subito le differenze reali
   });
 
-  const [isImageZoomed, setIsImageZoomed] = useState(false);
+  const [isConfirmingReset, setIsConfirmingReset] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setIsConfirmingReset(false);
+      return;
+    }
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -52,9 +63,11 @@ export const CruiseInfoModal: React.FC<CruiseInfoModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="cruise-modal-title"
+      onClick={onClose}
       className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200"
     >
       <div 
+        onClick={(e) => e.stopPropagation()}
         className="relative w-full max-w-xl max-h-[92vh] bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl flex flex-col overflow-hidden text-slate-100"
       >
         {/* Header Modal */}
@@ -139,30 +152,6 @@ export const CruiseInfoModal: React.FC<CruiseInfoModalProps> = ({
                       ))}
                     </tbody>
                   </table>
-                </div>
-
-                {/* Immagine Tragitto Ufficiale Ingrandibile */}
-                <div className="pt-2">
-                  <button
-                    onClick={() => setIsImageZoomed(!isImageZoomed)}
-                    className="w-full py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs font-semibold text-cyan-300 flex items-center justify-center gap-2 transition"
-                  >
-                    <Maximize2 className="w-3.5 h-3.5" />
-                    <span>{isImageZoomed ? 'Riduci Immagine Prenotazione' : 'Mostra Immagine Originale Grande'}</span>
-                  </button>
-
-                  {isImageZoomed && (
-                    <div className="mt-3 p-3 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col items-center animate-in zoom-in-95 duration-200">
-                      <img 
-                        src="/assets/aistudio/immagine_d82a340e.png" 
-                        alt="MSC Euribia Itinerario Ufficiale Prenotazione" 
-                        className="w-full max-w-sm rounded-xl border border-slate-700 shadow-xl bg-white p-2 object-contain"
-                      />
-                      <p className="text-[11px] text-slate-400 mt-2 text-center">
-                        Screenshot ufficiale MSC Crociere allegato alla prenotazione
-                      </p>
-                    </div>
-                  )}
                 </div>
               </div>
             )}
@@ -328,22 +317,44 @@ export const CruiseInfoModal: React.FC<CruiseInfoModalProps> = ({
             )}
           </div>
 
-          {/* Reset progressi checklist */}
-          <div className="pt-3 border-t border-slate-800 flex items-center justify-between gap-2">
+          {/* Reset progressi checklist (tutti gli scali + Giorno 5 Navigazione, conferma inline) */}
+          <div className="pt-3 border-t border-slate-800 flex items-center justify-between gap-2 flex-wrap">
             <div className="text-xs text-slate-400">
-              Spunte tappe salvate sul telefono
+              {isConfirmingReset
+                ? 'Azzerare tutte le spunte (scali + G5)?'
+                : 'Spunte tappe e missioni salvate sul telefono'}
             </div>
-            <button
-              onClick={() => {
-                if (window.confirm('Vuoi davvero azzerare tutte le tappe completate?')) {
-                  onResetProgress();
-                }
-              }}
-              className="text-xs font-semibold text-rose-400 hover:text-rose-300 bg-rose-950/50 hover:bg-rose-900/50 border border-rose-800/60 px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition active:scale-95"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              Azzera Tutte le Spunte
-            </button>
+            {isConfirmingReset ? (
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setIsConfirmingReset(false)}
+                  className="text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 px-3 py-1.5 rounded-xl transition active:scale-95"
+                >
+                  Annulla
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onResetProgress();
+                    setIsConfirmingReset(false);
+                  }}
+                  className="text-xs font-bold text-white bg-rose-600 hover:bg-rose-500 border border-rose-500 px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition active:scale-95"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  Sì, azzera
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setIsConfirmingReset(true)}
+                className="text-xs font-semibold text-rose-400 hover:text-rose-300 bg-rose-950/50 hover:bg-rose-900/50 border border-rose-800/60 px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition active:scale-95"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                Azzera Tutte le Spunte
+              </button>
+            )}
           </div>
         </div>
 

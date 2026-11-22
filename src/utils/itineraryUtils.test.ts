@@ -186,5 +186,27 @@ test('Every itinerary stop across all 5 ports and variants resolves an embedded 
   }
 });
 
+test('Marsiglia (Day 7) reflects dual Linea Verde transfer, Sunday Bus 35T warning, and 7.8 km ring with WhatsApp text', () => {
+  const marsiglia = itineraryData.find(p => p.id === 'marsiglia');
+  assert.ok(marsiglia, 'Marsiglia port not found');
+  assert.equal(marsiglia.giornoNumero, 7);
+  assert.equal(marsiglia.kmTotaliStimati, 7.8);
+  assert.equal(marsiglia.tappe.length, 7);
+  assert.equal(marsiglia.orarioAttracco, '09:00');
+  assert.equal(marsiglia.orarioSbarcoStimato, '09:45');
+  assert.equal(marsiglia.orarioTuttiABordo, '17:15');
+  assert.equal(marsiglia.orarioPartenza, '18:00');
+  assert.ok(marsiglia.sostaGolosaTop?.locale.includes('Four des Navettes'));
+
+  const shareText = formatItineraryForSharing(marsiglia);
+  assert.ok(shareText.includes('~7.8 km a piedi'));
+  assert.ok(shareText.includes('Bus RTM 35T'));
+  assert.ok(shareText.includes('9 Quai du Lazaret'));
+  assert.ok(shareText.includes('16:00'));
+  assert.ok(shareText.includes('Four des Navettes'));
+  assert.ok(shareText.includes('Jardin des Vestiges'));
+  assert.ok(shareText.includes('Fort Saint-Jean'));
+});
+
 
 

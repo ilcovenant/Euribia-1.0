@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { PortItinerary } from '../types/itinerary';
 import { ComputedCountdown, formatCompactDuration } from '../data/countdownData';
 import { Check, Timer } from 'lucide-react';
@@ -33,6 +33,18 @@ export const PortTabs: React.FC<PortTabsProps> = ({
 }) => {
   const isCountdownActive = activeViewId === 'countdown';
   const isSeaDayActive = activeViewId === 'navigazione';
+  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+
+  useEffect(() => {
+    const activeEl = tabRefs.current[activeViewId];
+    if (activeEl && typeof activeEl.scrollIntoView === 'function') {
+      activeEl.scrollIntoView({
+        behavior: 'smooth',
+        inline: 'center',
+        block: 'nearest'
+      });
+    }
+  }, [activeViewId]);
 
   const getCountdownTabStyle = () => {
     if (isCountdownActive) {
@@ -73,11 +85,12 @@ export const PortTabs: React.FC<PortTabsProps> = ({
   return (
     <nav 
       aria-label="Selezione porto del giorno e countdown rientro"
-      className="sticky top-[57px] z-20 bg-slate-950/90 backdrop-blur-md border-b border-slate-800/80 px-3 py-2 no-print"
+      className="relative z-20 bg-slate-950/95 backdrop-blur-md border-b border-slate-800/80 px-3 py-2 no-print"
     >
       <div className="max-w-xl mx-auto flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
         {/* Pulsante Countdown Live Tutti a Bordo */}
         <button
+          ref={(el) => { tabRefs.current['countdown'] = el; }}
           type="button"
           onClick={onSelectCountdown}
           aria-selected={isCountdownActive}
@@ -107,14 +120,15 @@ export const PortTabs: React.FC<PortTabsProps> = ({
           return (
             <React.Fragment key={port.id}>
               <button
+                ref={(el) => { tabRefs.current[port.id] = el; }}
                 type="button"
                 onClick={() => onSelectPort(port.id)}
                 aria-selected={isActive}
                 role="tab"
-                className={`shrink-0 min-h-[44px] flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all select-none whitespace-nowrap ${
+                className={`shrink-0 min-h-[44px] flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all select-none whitespace-nowrap border ${
                   isActive
-                    ? 'bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-500/20'
-                    : 'bg-slate-900/90 text-slate-300 border border-slate-800 hover:bg-slate-800/90 hover:text-white'
+                    ? 'bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-500/20 border-cyan-400'
+                    : 'bg-slate-900/90 text-slate-300 border-slate-800 hover:bg-slate-800/90 hover:text-white'
                 }`}
               >
                 <span className="text-base leading-none">{port.bandiera}</span>
@@ -140,14 +154,15 @@ export const PortTabs: React.FC<PortTabsProps> = ({
 
               {port.giornoNumero === 4 && (
                 <button
+                  ref={(el) => { tabRefs.current['navigazione'] = el; }}
                   type="button"
                   onClick={onSelectSeaDay}
                   aria-selected={isSeaDayActive}
                   role="tab"
-                  className={`shrink-0 min-h-[44px] flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all select-none whitespace-nowrap ${
+                  className={`shrink-0 min-h-[44px] flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all select-none whitespace-nowrap border ${
                     isSeaDayActive
-                      ? 'bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-500/20'
-                      : 'bg-slate-900/90 text-slate-300 border border-slate-800 hover:bg-slate-800/90 hover:text-white'
+                      ? 'bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-500/20 border-cyan-400'
+                      : 'bg-slate-900/90 text-slate-300 border-slate-800 hover:bg-slate-800/90 hover:text-white'
                   }`}
                 >
                   <span className="text-base leading-none">🌊</span>

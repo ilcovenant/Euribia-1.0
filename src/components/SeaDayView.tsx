@@ -116,6 +116,14 @@ export const SeaDayView: React.FC<SeaDayViewProps> = ({ onSelectPort }) => {
     }
   }, [checkedMissions]);
 
+  useEffect(() => {
+    const handleGlobalReset = () => {
+      setCheckedMissions({});
+    };
+    window.addEventListener('msc-reset-progress', handleGlobalReset);
+    return () => window.removeEventListener('msc-reset-progress', handleGlobalReset);
+  }, []);
+
   const toggleMission = (id: string) => {
     setCheckedMissions(prev => ({ ...prev, [id]: !prev[id] }));
   };

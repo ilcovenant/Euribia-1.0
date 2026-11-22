@@ -230,14 +230,24 @@ export const StopCard: React.FC<StopCardProps> = ({
         {/* Barra di Azioni: Checkbox, Wikipedia Offline & Apri su Maps */}
         <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between gap-2 flex-wrap no-print">
           <label 
-            className="flex items-center gap-2 cursor-pointer text-xs sm:text-sm text-slate-300 hover:text-white select-none py-1"
+            className="flex items-center gap-2.5 cursor-pointer text-xs sm:text-sm text-slate-300 hover:text-white select-none py-1 group/chk"
           >
             <input
               type="checkbox"
               checked={isChecked}
               onChange={() => onToggleCheck(stop.id)}
-              className="w-4 h-4 rounded text-cyan-500 focus:ring-0 focus:ring-offset-0 bg-slate-800 border-slate-700 cursor-pointer"
+              className="sr-only peer"
             />
+            <span
+              aria-hidden="true"
+              className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 border transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-cyan-400 ${
+                isChecked
+                  ? 'bg-emerald-500 border-emerald-400 text-slate-950'
+                  : 'bg-slate-950 border-slate-700 group-hover/chk:border-cyan-500/70 text-transparent'
+              }`}
+            >
+              <Check className="w-3.5 h-3.5 stroke-[3]" />
+            </span>
             <span className="font-medium">
               {isChecked ? 'Tappa completata' : 'Segna come visitata'}
             </span>

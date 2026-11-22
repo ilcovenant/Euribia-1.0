@@ -144,8 +144,12 @@ export default function App() {
     setCheckedStops({});
     try {
       localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem('msc_sea_day_checklist_v1');
     } catch {
       // ignore
+    }
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('msc-reset-progress'));
     }
   };
 
@@ -196,36 +200,38 @@ export default function App() {
 
   return (
     <div className="min-h-screen overflow-x-clip bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-slate-950">
-      {/* Header Mobile First */}
-      <Header
-        currentPortName={isCountdownView ? 'Tutti a Bordo' : isSeaDayView ? 'Navigazione' : activePort.citta}
-        nextEvent={countdown.nextCruiseEvent}
-        onClickNextEvent={() => {
-          if (countdown.nextCruiseEvent) {
-            countdown.setSelectedPortId(countdown.nextCruiseEvent.portId);
-          }
-          setActiveViewId('countdown');
-          if (typeof window !== 'undefined') {
-            window.location.hash = 'countdown';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }
-        }}
-        onOpenCruiseInfo={() => setIsCruiseModalOpen(true)}
-        onDownloadOfflineBundle={() => setIsOfflineModalOpen(true)}
-      />
+      {/* Barra Superiore Unificata Sticky (Header + Tabs Porti senza fessure su mobile) */}
+      <div className="sticky top-0 z-30 no-print">
+        <Header
+          currentPortName={isCountdownView ? 'Tutti a Bordo' : isSeaDayView ? 'Navigazione' : activePort.citta}
+          nextEvent={countdown.nextCruiseEvent}
+          onClickNextEvent={() => {
+            if (countdown.nextCruiseEvent) {
+              countdown.setSelectedPortId(countdown.nextCruiseEvent.portId);
+            }
+            setActiveViewId('countdown');
+            if (typeof window !== 'undefined') {
+              window.location.hash = 'countdown';
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+          }}
+          onOpenCruiseInfo={() => setIsCruiseModalOpen(true)}
+          onDownloadOfflineBundle={() => setIsOfflineModalOpen(true)}
+        />
 
-      {/* Barra Tabs Orizzontale (A Bordo + G2..G7 inclusa G5 Navigazione) */}
-      <PortTabs
-        ports={resolvedPorts}
-        activeViewId={activeViewId}
-        onSelectPort={handleSelectPort}
-        onSelectSeaDay={handleSelectSeaDay}
-        onSelectCountdown={handleSelectCountdown}
-        checkedStopsByPort={checkedStopsByPort}
-        activeLiveCountdown={countdown.activeLiveCountdown}
-        isBeforeCruise={countdown.isBeforeCruise}
-        preCruiseRemainingMs={countdown.isBeforeBoarding ? countdown.boardingRemainingMs : countdown.preCruiseRemainingMs}
-      />
+        {/* Barra Tabs Orizzontale (A Bordo + G2..G7 inclusa G5 Navigazione) */}
+        <PortTabs
+          ports={resolvedPorts}
+          activeViewId={activeViewId}
+          onSelectPort={handleSelectPort}
+          onSelectSeaDay={handleSelectSeaDay}
+          onSelectCountdown={handleSelectCountdown}
+          checkedStopsByPort={checkedStopsByPort}
+          activeLiveCountdown={countdown.activeLiveCountdown}
+          isBeforeCruise={countdown.isBeforeCruise}
+          preCruiseRemainingMs={countdown.isBeforeBoarding ? countdown.boardingRemainingMs : countdown.preCruiseRemainingMs}
+        />
+      </div>
 
       {/* Intestazione speciale visibile SOLO in fase di stampa / PDF */}
       <div className="hidden print-only p-4 border-b border-slate-300">
@@ -297,25 +303,25 @@ export default function App() {
               </button>
             )}
 
-            {/* Selettore Variante Itinerario (se lo scalo offre percorsi alternativi) */}
+            {/* Selettore Variante Itinerario (compatto a 2 colonne anche su mobile) */}
             {activePort.varianti && activePort.varianti.length > 1 && (
               <section
                 aria-label="Selezione variante itinerario"
-                className="bg-slate-900/95 border border-cyan-500/35 rounded-2xl p-3.5 shadow-lg no-print"
+                className="bg-slate-900/95 border border-cyan-500/35 rounded-2xl p-3 shadow-lg no-print"
               >
-                <div className="flex items-center justify-between gap-2 mb-2.5">
-                  <div className="flex items-center gap-2">
-                    <Route className="w-4 h-4 text-cyan-400 shrink-0" />
-                    <h2 className="text-xs font-extrabold uppercase tracking-wider text-cyan-300">
-                      Scegli Percorso Giorno {activePort.giornoNumero}
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <div className="flex items-center gap-1.5">
+                    <Route className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                    <h2 className="text-[11px] sm:text-xs font-extrabold uppercase tracking-wider text-cyan-300">
+                      Percorso Giorno {activePort.giornoNumero}
                     </h2>
                   </div>
                   <span className="text-[10px] font-mono text-slate-400">
-                    {activePort.varianti.length} varianti pronte
+                    {activePort.varianti.length} varianti
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-2">
                   {activePort.varianti.map((variant, idx) => {
                     const isSelected = variant.id === activeVariantId;
                     const optionLetter = String.fromCharCode(65 + idx);
@@ -325,30 +331,32 @@ export default function App() {
                         type="button"
                         onClick={() => handleSelectVariant(activePort.id, variant.id)}
                         aria-pressed={isSelected}
-                        className={`text-left rounded-xl p-3 border transition-all active:scale-[0.98] ${
+                        className={`text-left rounded-xl p-2.5 sm:p-3 border transition-all active:scale-[0.98] flex flex-col justify-between ${
                           isSelected
                             ? 'bg-cyan-500/15 border-cyan-400 text-white shadow-md shadow-cyan-500/10'
                             : 'bg-slate-950/75 border-slate-800 text-slate-300 hover:border-slate-700 hover:bg-slate-950'
                         }`}
                       >
-                        <div className="flex items-center justify-between gap-2 mb-1">
-                          <span
-                            className={`text-[10px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${
-                              isSelected
-                                ? 'bg-cyan-500 text-slate-950'
-                                : 'bg-slate-800 text-slate-400'
-                            }`}
-                          >
-                            Opzione {optionLetter}
-                          </span>
-                          {isSelected && (
-                            <CheckCircle2 className="w-4 h-4 text-cyan-400 shrink-0" />
-                          )}
+                        <div>
+                          <div className="flex items-center justify-between gap-1.5 mb-1">
+                            <span
+                              className={`text-[10px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${
+                                isSelected
+                                  ? 'bg-cyan-500 text-slate-950'
+                                  : 'bg-slate-800 text-slate-400'
+                              }`}
+                            >
+                              Opzione {optionLetter}
+                            </span>
+                            {isSelected && (
+                              <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                            )}
+                          </div>
+                          <div className="text-xs sm:text-sm font-extrabold leading-tight text-white">
+                            {variant.label}
+                          </div>
                         </div>
-                        <div className="text-sm font-extrabold leading-snug text-white">
-                          {variant.label}
-                        </div>
-                        <div className={`text-[11px] font-mono mt-0.5 ${isSelected ? 'text-cyan-300' : 'text-slate-400'}`}>
+                        <div className={`text-[10px] sm:text-[11px] font-mono mt-1 leading-tight ${isSelected ? 'text-cyan-300' : 'text-slate-400'}`}>
                           {variant.badge}
                         </div>
                       </button>
@@ -358,54 +366,56 @@ export default function App() {
               </section>
             )}
 
-            {/* Selettore Scheda Giorno 4 La Goletta: Itinerario vs Kit Sopravvivenza Offline */}
+            {/* Selettore Scheda Giorno 4 La Goletta: Itinerario vs Kit Sopravvivenza Offline (2 colonne compatte) */}
             {activePort.id === 'la-goletta' && (
               <section
                 aria-label="Scegli scheda La Goletta"
-                className="bg-slate-900/95 border border-cyan-500/35 rounded-2xl p-3.5 shadow-lg no-print"
+                className="bg-slate-900/95 border border-cyan-500/35 rounded-2xl p-3 shadow-lg no-print"
               >
-                <div className="flex items-center justify-between gap-2 mb-2.5">
-                  <div className="flex items-center gap-2">
-                    <Compass className="w-4 h-4 text-cyan-400 shrink-0" />
-                    <h2 className="text-xs font-extrabold uppercase tracking-wider text-cyan-300">
-                      Sezione Giorno 4 · Tunisia
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <div className="flex items-center gap-1.5">
+                    <Compass className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                    <h2 className="text-[11px] sm:text-xs font-extrabold uppercase tracking-wider text-cyan-300">
+                      Giorno 4 · Tunisia
                     </h2>
                   </div>
                   <span className="text-[10px] font-mono text-slate-400">
-                    2 schede pronte
+                    2 schede
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={() => setTunisiaTab('itinerario')}
                     aria-pressed={tunisiaTab === 'itinerario'}
-                    className={`text-left rounded-xl p-3 border transition-all active:scale-[0.98] ${
+                    className={`text-left rounded-xl p-2.5 sm:p-3 border transition-all active:scale-[0.98] flex flex-col justify-between ${
                       tunisiaTab === 'itinerario'
                         ? 'bg-cyan-500/15 border-cyan-400 text-white shadow-md shadow-cyan-500/10'
                         : 'bg-slate-950/75 border-slate-800 text-slate-300 hover:border-slate-700 hover:bg-slate-950'
                     }`}
                   >
-                    <div className="flex items-center justify-between gap-2 mb-1">
-                      <span
-                        className={`text-[10px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${
-                          tunisiaTab === 'itinerario'
-                            ? 'bg-cyan-500 text-slate-950'
-                            : 'bg-slate-800 text-slate-400'
-                        }`}
-                      >
-                        Scheda A
-                      </span>
-                      {tunisiaTab === 'itinerario' && (
-                        <CheckCircle2 className="w-4 h-4 text-cyan-400 shrink-0" />
-                      )}
+                    <div>
+                      <div className="flex items-center justify-between gap-1.5 mb-1">
+                        <span
+                          className={`text-[10px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${
+                            tunisiaTab === 'itinerario'
+                              ? 'bg-cyan-500 text-slate-950'
+                              : 'bg-slate-800 text-slate-400'
+                          }`}
+                        >
+                          Scheda A
+                        </span>
+                        {tunisiaTab === 'itinerario' && (
+                          <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                        )}
+                      </div>
+                      <div className="text-xs sm:text-sm font-extrabold leading-tight text-white">
+                        Itinerario
+                      </div>
                     </div>
-                    <div className="text-sm font-extrabold leading-snug text-white">
-                      Itinerario La Goletta
-                    </div>
-                    <div className={`text-[11px] font-mono mt-0.5 ${tunisiaTab === 'itinerario' ? 'text-cyan-300' : 'text-slate-400'}`}>
-                      Sidi Bou Saïd + Cartagine • {activePort.kmTotaliStimati} km
+                    <div className={`text-[10px] sm:text-[11px] font-mono mt-1 leading-tight ${tunisiaTab === 'itinerario' ? 'text-cyan-300' : 'text-slate-400'}`}>
+                      Sidi Bou + Cartagine • {activePort.kmTotaliStimati}km
                     </div>
                   </button>
 
@@ -413,31 +423,33 @@ export default function App() {
                     type="button"
                     onClick={() => setTunisiaTab('kit')}
                     aria-pressed={tunisiaTab === 'kit'}
-                    className={`text-left rounded-xl p-3 border transition-all active:scale-[0.98] ${
+                    className={`text-left rounded-xl p-2.5 sm:p-3 border transition-all active:scale-[0.98] flex flex-col justify-between ${
                       tunisiaTab === 'kit'
                         ? 'bg-cyan-500/15 border-cyan-400 text-white shadow-md shadow-cyan-500/10'
                         : 'bg-slate-950/75 border-slate-800 text-slate-300 hover:border-slate-700 hover:bg-slate-950'
                     }`}
                   >
-                    <div className="flex items-center justify-between gap-2 mb-1">
-                      <span
-                        className={`text-[10px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${
-                          tunisiaTab === 'kit'
-                            ? 'bg-cyan-500 text-slate-950'
-                            : 'bg-slate-800 text-slate-400'
-                        }`}
-                      >
-                        Scheda B
-                      </span>
-                      {tunisiaTab === 'kit' && (
-                        <CheckCircle2 className="w-4 h-4 text-cyan-400 shrink-0" />
-                      )}
+                    <div>
+                      <div className="flex items-center justify-between gap-1.5 mb-1">
+                        <span
+                          className={`text-[10px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${
+                            tunisiaTab === 'kit'
+                              ? 'bg-cyan-500 text-slate-950'
+                              : 'bg-slate-800 text-slate-400'
+                          }`}
+                        >
+                          Scheda B
+                        </span>
+                        {tunisiaTab === 'kit' && (
+                          <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                        )}
+                      </div>
+                      <div className="text-xs sm:text-sm font-extrabold leading-tight text-white">
+                        Kit Offline
+                      </div>
                     </div>
-                    <div className="text-sm font-extrabold leading-snug text-white">
-                      Kit Sopravvivenza Offline
-                    </div>
-                    <div className={`text-[11px] font-mono mt-0.5 ${tunisiaTab === 'kit' ? 'text-cyan-300' : 'text-slate-400'}`}>
-                      Wiki • Cambio TND • Frasario
+                    <div className={`text-[10px] sm:text-[11px] font-mono mt-1 leading-tight ${tunisiaTab === 'kit' ? 'text-cyan-300' : 'text-slate-400'}`}>
+                      Wiki • Cambio TND • SOS
                     </div>
                   </button>
                 </div>

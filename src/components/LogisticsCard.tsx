@@ -124,12 +124,14 @@ export const LogisticsCard: React.FC<LogisticsCardProps> = ({ port, checkedStops
 
         <div className="flex items-start gap-2.5">
           <Bus className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
-          <div className="leading-snug">
-            <strong className="text-white font-semibold">Uscita dal molo:</strong>{' '}
-            <span className="text-slate-200">{port.infoLogisticaMolo.mezzoConsigliato}</span>
-            <div className="inline-block ml-2 px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800/60 font-mono font-bold text-xs">
+          <div className="leading-snug flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span>
+              <strong className="text-white font-semibold">Uscita dal molo:</strong>{' '}
+              <span className="text-slate-200">{port.infoLogisticaMolo.mezzoConsigliato}</span>
+            </span>
+            <span className="inline-block px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800/60 font-mono font-bold text-xs">
               {port.infoLogisticaMolo.costoTransfer}
-            </div>
+            </span>
           </div>
         </div>
 
@@ -148,7 +150,7 @@ export const LogisticsCard: React.FC<LogisticsCardProps> = ({ port, checkedStops
 
       {/* Barra di Avanzamento Tappe del Porto */}
       <div className="mt-3.5 pt-2">
-        <div className="flex items-center justify-between text-xs text-slate-400 mb-1.5">
+        <div className="flex items-center justify-between flex-wrap gap-x-2 gap-y-0.5 text-xs text-slate-400 mb-1.5">
           <span className="font-medium text-slate-300">Progresso circuito a piedi</span>
           <span className="font-mono text-cyan-400 font-bold">
             {stats.completed}/{stats.total} tappe ({stats.percent}%) •{' '}
@@ -177,13 +179,13 @@ export const LogisticsCard: React.FC<LogisticsCardProps> = ({ port, checkedStops
         >
           {copied ? (
             <>
-              <CheckCheck className="w-4 h-4" />
-              <span>Copiato negli Appunti!</span>
+              <CheckCheck className="w-4 h-4 shrink-0" />
+              <span>Copiato!</span>
             </>
           ) : (
             <>
-              <Share2 className="w-4 h-4 text-cyan-400" />
-              <span>Copia per WhatsApp</span>
+              <Share2 className="w-4 h-4 text-cyan-400 shrink-0" />
+              <span>Copia WhatsApp</span>
             </>
           )}
         </button>

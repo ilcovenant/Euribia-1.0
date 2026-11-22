@@ -87,7 +87,7 @@ export const Header: React.FC<HeaderProps> = ({
     : '';
 
   return (
-    <header className="sticky top-0 z-30 bg-slate-950/95 backdrop-blur-md border-b border-slate-800/80 px-2.5 sm:px-4 py-2 select-none no-print">
+    <header className="relative z-30 bg-slate-950/95 backdrop-blur-md border-b border-slate-800/80 px-2.5 sm:px-4 py-2 select-none no-print">
       <div className="max-w-xl mx-auto flex items-center justify-between gap-2">
         {/* Logo & Titolo compatto su mobile */}
         <div className="flex items-center gap-2 shrink-0">
